@@ -5,10 +5,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonClassDiscriminator
-import net.stckoverflw.twitchcontrols.minecraft.twitch.impl.channelPointEventId
-import net.stckoverflw.twitchcontrols.minecraft.twitch.impl.followEventId
-import net.stckoverflw.twitchcontrols.minecraft.twitch.impl.subGiftSingularEventId
-import net.stckoverflw.twitchcontrols.minecraft.twitch.impl.subscribeEventId
+import net.stckoverflw.twitchcontrols.minecraft.twitch.impl.*
 
 @OptIn(ExperimentalSerializationApi::class)
 @Serializable
@@ -50,7 +47,7 @@ data class SubGiftSingularEventData(
 }
 
 @Serializable
-@SerialName(subGiftSingularEventId)
+@SerialName(subGiftMultipleEventId)
 data class SubGiftMultipleEventData(
     @Contextual val amountRange: IntRange? = null
 ) : EventData() {

@@ -13,6 +13,7 @@ import net.minecraft.item.ItemStack
 import net.minecraft.item.Items
 import net.minecraft.util.Formatting
 import net.stckoverflw.twitchcontrols.gui.item.grayPlaceholder
+import net.stckoverflw.twitchcontrols.gui.selectActionGUI
 import net.stckoverflw.twitchcontrols.minecraft.EventManager
 import net.stckoverflw.twitchcontrols.minecraft.action.TwitchExecutorData
 import net.stckoverflw.twitchcontrols.minecraft.twitch.SubGiftMultipleEventData
@@ -37,7 +38,7 @@ object SubGiftMultipleEvent : TwitchEvent<SubGiftSingularEventData>(subGiftMulti
                 placeholder(Slots.All, grayPlaceholder)
 
                 button(
-                    4 sl 3, GuiIcon.VariableIcon(
+                    4 sl 7, GuiIcon.VariableIcon(
                         amountRangeProperty,
                         amountRangeProperty.guiIcon {
                             itemStack(Items.FEATHER, 1) {
@@ -90,6 +91,22 @@ object SubGiftMultipleEvent : TwitchEvent<SubGiftSingularEventData>(subGiftMulti
                     )
                 ) {
                     it.rangeChangerMax(amountRangeProperty)
+                }
+
+
+                button(3 sl 5, GuiIcon.VariableIcon(amountRangeProperty, amountRangeProperty.guiIcon {
+                    itemStack(Items.WRITABLE_BOOK, 1) {
+                        setCustomName("Confirm".literal.formatted(Formatting.GREEN))
+                        setLore(
+                            listOf(
+                                "with range = ${it.first.toString() + "<=..<=" + it.last.toString()}".literal.formatted(
+                                    Formatting.GRAY
+                                )
+                            )
+                        )
+                    }
+                }.iconGenerator)) {
+                    it.player.openGui(selectActionGUI(SubGiftMultipleEventData(amountRangeProperty.get())), 1)
                 }
             }
         }
