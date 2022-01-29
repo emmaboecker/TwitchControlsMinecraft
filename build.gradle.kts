@@ -1,6 +1,8 @@
 plugins {
 	id("fabric-loom") version "0.10-SNAPSHOT"
-	`maven-publish`
+	val kotlinVersion: String by System.getProperties()
+	kotlin("jvm") version kotlinVersion
+	kotlin("plugin.serialization") version kotlinVersion
 }
 
 val sourceCompatibility = JavaVersion.VERSION_17
@@ -11,11 +13,7 @@ val mod_version: String by project
 val maven_group: String by project
 
 repositories {
-	// Add repositories to retrieve artifacts from in here.
-	// You should only use this when depending on other mods because
-	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
-	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
-	// for more information about repositories.
+	mavenCentral()
 }
 
 val minecraft_version: String by project
@@ -23,39 +21,48 @@ val yarn_mappings: String by project
 val loader_version: String by project
 
 val fabric_version: String by project
+val fabric_kotlin_version: String by project
+val fabrikmc_version: String by project
 
 dependencies {
-	// To change the versions see the gradle.properties file
-	minecraft("com.mojang:minecraft:${minecraft_version}")
-	mappings("net.fabricmc:yarn:${yarn_mappings}:v2")
-	modImplementation("net.fabricmc:fabric-loader:${loader_version}")
+	minecraft("com.mojang:minecraft:$minecraft_version")
+	mappings("net.fabricmc:yarn:$yarn_mappings:v2")
 
-	// Fabric API. This is technically optional, but you probably want it anyway.
-	modImplementation("net.fabricmc.fabric-api:fabric-api:${fabric_version}")
+	implementation("com.github.twitch4j:twitch4j:1.8.0")
 
-	// PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
-	// You may need to force-disable transitiveness on them.
+	modImplementation("net.fabricmc:fabric-loader:$loader_version")
+	modImplementation("net.fabricmc.fabric-api:fabric-api:$fabric_version")
+
+	modImplementation("net.fabricmc:fabric-language-kotlin:$fabric_kotlin_version")
+	modImplementation("net.axay:fabrikmc-core:$fabrikmc_version")
+	modImplementation("net.axay:fabrikmc-commands:$fabrikmc_version")
+	modImplementation("net.axay:fabrikmc-igui:$fabrikmc_version")
+	modImplementation("net.axay:fabrikmc-persistence:$fabrikmc_version")
+}
+
+kotlin {
+	jvmToolchain {
+		(this as JavaToolchainSpec).languageVersion.set(JavaLanguageVersion.of(17))
+	}
 }
 
 tasks {
 	withType<JavaCompile> {
-		// ensure that the encoding is set to UTF-8, no matter what the system default is
-		// this fixes some edge cases with special characters not displaying correctly
-		// see http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
-		// If Javadoc is generated, this must be specified in that task too.
 		options.encoding = "UTF-8"
 
-		// The Minecraft launcher currently installs Java 8 for users, so your mod probably wants to target Java 8 too
-		// JDK 9 introduced a new way of specifying this that will make sure no newer classes or methods are used.
-		// We'll use that if it's available, but otherwise we'll use the older option.
-		val targetVersion = 17
-		if (JavaVersion.current().isJava9Compatible) {
-			options.release.convention(targetVersion)
+		options.release.set(17)
+	}
+
+
+	withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+		kotlinOptions {
+			jvmTarget = "17"
+			freeCompilerArgs = freeCompilerArgs + "-opt-in=kotlin.RequiresOptIn"
 		}
 	}
 
 	processResources {
-		inputs.property("version",  project.version)
+		inputs.property("version", project.version)
 
 		filesMatching("fabric.mod.json") {
 			this.expand("version" to project.version)
@@ -65,30 +72,6 @@ tasks {
 	jar {
 		from("LICENSE") {
 			rename { "${it}_${archives_base_name}" }
-		}
-	}
-
-	val sourcesJar by creating(Jar::class) {
-		dependsOn(classes)
-		archiveClassifier.convention("sources")
-		from(sourceSets["main"].allSource)
-	}
-
-	publishing {
-		publications {
-			create<MavenPublication>("maven") {
-				// add all the jars that should be included when publishing to maven
-				artifact(remapJar.get())
-				artifact(sourcesJar)
-			}
-		}
-
-		// See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
-		repositories {
-			// Add repositories to publish to here.
-			// Notice: This block does NOT have the same function as the block in the top level.
-			// The repositories here will be used for publishing your artifact, not for
-			// retrieving dependencies.
 		}
 	}
 }

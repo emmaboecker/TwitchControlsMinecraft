@@ -1,37 +1,39 @@
 {
   "schemaVersion": 1,
-  "id": "modid",
+  "id": "twitch-controls",
   "version": "${version}",
-
-  "name": "Example Mod",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "name": "Twitch Controls Minecraft",
+  "description": "A Minecraft mod that gives your stream chat control of your Game",
   "authors": [
-    "Me!"
+    "StckOverflw"
   ],
   "contact": {
-    "homepage": "https://fabricmc.net/",
-    "sources": "https://github.com/FabricMC/fabric-example-mod"
+    "homepage": "https://stckoverflw.net/",
+    "sources": "https://github.com/StckOverflw/TwitchControlsMinecraft"
   },
-
-  "license": "CC0-1.0",
-  "icon": "assets/modid/icon.png",
-
+  "license": "AGPL-3.0",
   "environment": "*",
   "entrypoints": {
     "main": [
-      "net.fabricmc.example.ExampleMod"
+      {
+        "adapter": "kotlin",
+        "value": "net.stckoverflw.twitchcontrols.TwitchControlsMod"
+      }
     ]
   },
   "mixins": [
-    "modid.mixins.json"
+    "twitchcontrols.mixins.json"
   ],
 
   "depends": {
     "fabricloader": ">=0.7.4",
     "fabric": "*",
-    "minecraft": "1.18.x"
-  },
-  "suggests": {
-    "another-mod": "*"
+    "minecraft": "1.18.x",
+    "fabric-language-kotlin": ">=1.7.1+kotlin.1.6.10",
+    "fabrikmc-core": ">=1.7.1",
+    "fabrikmc-igui": ">=1.7.1",
+    "fabrikmc-persistence": ">=1.7.1",
+    "fabrikmc-commands": ">=1.7.1",
+    "java": ">=17"
   }
 }
