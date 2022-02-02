@@ -12,7 +12,9 @@ import net.stckoverflw.twitchcontrols.minecraft.action.LitPlayerOnFireData
 import net.stckoverflw.twitchcontrols.minecraft.action.TwitchExecutorData
 import net.stckoverflw.twitchcontrols.minecraft.twitch.EventData
 
-class LitPlayerOnFireAction : Action<LitPlayerOnFireData>("lit-player-on-fire") {
+const val litPlayerOnFireId = "lit-player-on-fire"
+
+class LitPlayerOnFireAction : Action<LitPlayerOnFireData>(litPlayerOnFireId) {
     override val icon: ItemStack = itemStack(Items.FLINT_AND_STEEL, 1) {
         setCustomName("Lit Player On Fire".literal.formatted(Formatting.RED))
     }

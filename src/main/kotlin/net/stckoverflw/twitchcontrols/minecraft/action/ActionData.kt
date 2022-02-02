@@ -6,6 +6,9 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonClassDiscriminator
 import net.minecraft.util.Identifier
+import net.stckoverflw.twitchcontrols.minecraft.action.impl.giveItemId
+import net.stckoverflw.twitchcontrols.minecraft.action.impl.litPlayerOnFireId
+import net.stckoverflw.twitchcontrols.minecraft.action.impl.spawnEntityId
 
 @OptIn(ExperimentalSerializationApi::class)
 @Serializable
@@ -13,7 +16,7 @@ import net.minecraft.util.Identifier
 sealed class ActionData
 
 @Serializable
-@SerialName("spawn-entity")
+@SerialName(spawnEntityId)
 data class SpawnEntityData(
     @Contextual val entity: Identifier,
     val includeTwitchName: Boolean
@@ -22,7 +25,16 @@ data class SpawnEntityData(
 }
 
 @Serializable
-@SerialName("lit-player-on-fire")
+@SerialName(litPlayerOnFireId)
 data class LitPlayerOnFireData(
     val periodInSeconds: Int
 ) : ActionData()
+
+@Serializable
+@SerialName(giveItemId)
+data class GiveItemData(
+    @Contextual val item: Identifier,
+    val amount: Int
+) : ActionData() {
+    override fun toString(): String = "give $amount ${item.path}"
+}

@@ -5,6 +5,7 @@ import kotlinx.serialization.encodeToString
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.entity.player.PlayerEntity
 import net.stckoverflw.twitchcontrols.MOD_ID
+import net.stckoverflw.twitchcontrols.minecraft.action.impl.GiveItemAction
 import net.stckoverflw.twitchcontrols.minecraft.action.impl.LitPlayerOnFireAction
 import net.stckoverflw.twitchcontrols.minecraft.action.impl.SpawnEntityAction
 import net.stckoverflw.twitchcontrols.minecraft.twitch.impl.*
@@ -18,7 +19,8 @@ object EventManager {
 
     val actions = listOf(
         SpawnEntityAction(),
-        LitPlayerOnFireAction()
+        LitPlayerOnFireAction(),
+        GiveItemAction()
     )
 
     val twitchEvents = listOf(

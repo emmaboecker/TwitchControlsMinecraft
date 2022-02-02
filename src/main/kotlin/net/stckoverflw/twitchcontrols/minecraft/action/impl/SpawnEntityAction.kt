@@ -8,10 +8,12 @@ import net.axay.fabrik.igui.observable.GuiProperty
 import net.axay.fabrik.igui.observable.toGuiList
 import net.minecraft.client.MinecraftClient
 import net.minecraft.enchantment.Enchantments
+import net.minecraft.entity.EntityType
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
 import net.minecraft.item.Items
 import net.minecraft.item.SpawnEggItem
+import net.minecraft.text.Text
 import net.minecraft.util.Formatting
 import net.minecraft.util.Identifier
 import net.minecraft.util.registry.Registry
@@ -24,7 +26,9 @@ import net.stckoverflw.twitchcontrols.minecraft.action.TwitchExecutorData
 import net.stckoverflw.twitchcontrols.minecraft.addAction
 import net.stckoverflw.twitchcontrols.minecraft.twitch.EventData
 
-class SpawnEntityAction : Action<SpawnEntityData>("spawn-entity") {
+const val spawnEntityId = "spawn-entity"
+
+class SpawnEntityAction : Action<SpawnEntityData>(spawnEntityId) {
 
     override val icon = itemStack(Items.CREEPER_SPAWN_EGG) {
         setCustomName("Spawn a specific Entity".literal.formatted(Formatting.DARK_GREEN))
@@ -54,18 +58,30 @@ class SpawnEntityAction : Action<SpawnEntityData>("spawn-entity") {
 
             val compound = compound(
                 (1 sl 2) rectTo (5 sl 8),
-                Registry.ITEM.filterIsInstance<SpawnEggItem>().toGuiList(),
+                (Registry.ITEM.filterIsInstance<SpawnEggItem>().map {
+                    EntityEntry(
+                        Registry.ENTITY_TYPE.getId(it.getEntityType(it.defaultStack.nbt)),
+                        it.defaultStack,
+                        it.getEntityType(it.defaultStack.nbt).name
+                    )
+                } + listOf(
+                    EntityEntry(
+                        Registry.ENTITY_TYPE.getId(EntityType.WITHER),
+                        Items.WITHER_SKELETON_SKULL.defaultStack,
+                        "Wither".literal.formatted(Formatting.LIGHT_PURPLE),
+                    )
+                )).toGuiList(),
                 iconGenerator = {
-                    it.defaultStack.copy().apply {
-                        setCustomName(it.getEntityType(it.defaultStack.nbt).name)
-                        if (entityProperty.get() == Registry.ENTITY_TYPE.getId(it.getEntityType(it.defaultStack.nbt))) {
+                    it.item.copy().apply {
+                        setCustomName(it.name)
+                        if (entityProperty.get() == it.identifier) {
                             addEnchantment(Enchantments.UNBREAKING, 1)
                             addHideFlag(ItemStack.TooltipSection.ENCHANTMENTS)
                         }
                     }
                 },
                 onClick = { event, element ->
-                    entityProperty.set(Registry.ENTITY_TYPE.getId(element.getEntityType(element.defaultStack.nbt)))
+                    entityProperty.set(element.identifier)
                     event.gui.changePage(event.gui.currentPage, event.gui.pagesByNumber[2]!!)
                 }
             )
@@ -136,3 +152,8 @@ class SpawnEntityAction : Action<SpawnEntityData>("spawn-entity") {
     override fun getActionData(): SpawnEntityData? = null
 }
 
+private data class EntityEntry(
+    val identifier: Identifier,
+    val item: ItemStack,
+    val name: Text
+)
