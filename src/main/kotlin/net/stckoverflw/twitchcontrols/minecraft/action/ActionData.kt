@@ -6,6 +6,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonClassDiscriminator
 import net.minecraft.util.Identifier
+import net.stckoverflw.twitchcontrols.minecraft.action.impl.addPotionEffectId
 import net.stckoverflw.twitchcontrols.minecraft.action.impl.giveItemId
 import net.stckoverflw.twitchcontrols.minecraft.action.impl.litPlayerOnFireId
 import net.stckoverflw.twitchcontrols.minecraft.action.impl.spawnEntityId
@@ -37,4 +38,14 @@ data class GiveItemData(
     val amount: Int
 ) : ActionData() {
     override fun toString(): String = "give $amount ${item.path}"
+}
+
+@Serializable
+@SerialName(addPotionEffectId)
+data class AddPotionEffectData(
+    @Contextual val effect: Identifier,
+    val level: Int,
+    val period: Int,
+) : ActionData() {
+    override fun toString(): String = "add effect ${effect.path} level $level for $period seconds"
 }
