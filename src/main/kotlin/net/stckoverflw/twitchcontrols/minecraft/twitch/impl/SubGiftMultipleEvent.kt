@@ -42,14 +42,19 @@ object SubGiftMultipleEvent : TwitchEvent<SubGiftSingularEventData>(subGiftMulti
                         amountRangeProperty,
                         amountRangeProperty.guiIcon {
                             itemStack(Items.FEATHER, 1) {
-                                setCustomName("Minimal Gifts".literal.formatted(Formatting.AQUA))
+                                setCustomName(
+                                    "Minimal Gifts: ".literal.formatted(Formatting.AQUA)
+                                        .append(it.first.toString().literal.formatted(Formatting.BLUE))
+                                )
                                 setLore(
                                     listOf(
                                         "The minimal amount of subs required to trigger this action".literal.formatted(
                                             Formatting.GRAY
                                         ),
                                         "".literal,
-                                        "Attention!".literal.formatted(Formatting.RED).append(
+                                        "Click to higher, shift click to lower".literal.formatted(Formatting.GRAY),
+                                        "".literal,
+                                        "Attention! ".literal.formatted(Formatting.RED).append(
                                             "If there are multiple actions crossing the same range of subs,".literal.formatted(
                                                 Formatting.GRAY
                                             )
@@ -69,7 +74,10 @@ object SubGiftMultipleEvent : TwitchEvent<SubGiftSingularEventData>(subGiftMulti
                         amountRangeProperty,
                         amountRangeProperty.guiIcon {
                             itemStack(Items.BOOK, 1) {
-                                setCustomName("Maximal Gifts".literal.formatted(Formatting.AQUA))
+                                setCustomName(
+                                    "Maximal Gifts: ".literal.formatted(Formatting.AQUA)
+                                        .append(it.last.toString().literal.formatted(Formatting.BLUE))
+                                )
                                 setLore(
                                     listOf(
                                         "The maximal amount of subs required to trigger this action".literal.formatted(
@@ -78,7 +86,7 @@ object SubGiftMultipleEvent : TwitchEvent<SubGiftSingularEventData>(subGiftMulti
                                         "".literal,
                                         "Click to higher, shift click to lower".literal.formatted(Formatting.GRAY),
                                         "".literal,
-                                        "Attention!".literal.formatted(Formatting.RED).append(
+                                        "Attention! ".literal.formatted(Formatting.RED).append(
                                             "If there are multiple actions crossing the same range of subs,".literal.formatted(
                                                 Formatting.GRAY
                                             )

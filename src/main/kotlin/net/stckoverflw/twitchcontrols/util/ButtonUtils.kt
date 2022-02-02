@@ -18,9 +18,13 @@ suspend fun GuiClickEvent.rangeChangerMin(rangeProperty: GuiProperty<IntRange>) 
 suspend fun GuiClickEvent.rangeChangerMax(rangeProperty: GuiProperty<IntRange>) {
     val range = rangeProperty.get()
     if (type == GuiActionType.PICKUP) {
-        rangeProperty.set((range.first + 1)..range.last)
+        rangeProperty.set(range.first..(range.last + 1))
     } else if (type == GuiActionType.SHIFT_CLICK) {
         if (range.last <= 0) return
-        rangeProperty.set((range.first - 1)..range.last)
+        if (range.first >= range.last) {
+            rangeProperty.set((range.first - 1) until range.last)
+        } else {
+            rangeProperty.set(range.first until range.last)
+        }
     }
 }
