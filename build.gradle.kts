@@ -1,9 +1,15 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
 	id("fabric-loom") version "0.10-SNAPSHOT"
 	val kotlinVersion: String by System.getProperties()
 	kotlin("jvm") version kotlinVersion
 	kotlin("plugin.serialization") version kotlinVersion
+	id("com.github.johnrengelman.shadow") version "7.1.2"
 }
+
+group = "net.stckoverflw"
+version = "1.0.0"
 
 val sourceCompatibility = JavaVersion.VERSION_17
 val targetCompatibility = JavaVersion.VERSION_17
@@ -58,6 +64,20 @@ tasks {
 		kotlinOptions {
 			jvmTarget = "17"
 			freeCompilerArgs = freeCompilerArgs + "-opt-in=kotlin.RequiresOptIn"
+		}
+	}
+
+	remapJar {
+		val shadowJar = getByName<ShadowJar>("shadowJar")
+		dependsOn(shadowJar)
+		mustRunAfter(shadowJar)
+		input.set(shadowJar.archiveFile)
+	}
+
+	shadowJar {
+
+		dependencies {
+			include(dependency("com.github.twitch4j:twitch4j"))
 		}
 	}
 
