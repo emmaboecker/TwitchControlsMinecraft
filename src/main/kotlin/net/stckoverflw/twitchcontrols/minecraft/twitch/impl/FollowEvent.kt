@@ -1,6 +1,6 @@
 package net.stckoverflw.twitchcontrols.minecraft.twitch.impl
 
-import com.github.twitch4j.chat.events.channel.FollowEvent
+import com.github.twitch4j.pubsub.events.FollowingEvent
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
 import net.axay.fabrik.core.item.itemStack
@@ -30,7 +30,7 @@ object FollowEvent : TwitchEvent<FollowEventData>(followEventId) {
     override fun gui(player: PlayerEntity): Gui = selectActionGUI(FollowEventData(UUID.randomUUID().toString()))
 
     override fun runEvent(eventManager: TwitchEventManager, player: PlayerEntity) {
-        eventManager.onEvent(FollowEvent::class.java) {
+        eventManager.onEvent(FollowingEvent::class.java) {
             val activeProfile = EventManager.activeProfile[player.uuid] ?: return@onEvent
             activeProfile.actions.forEach { (_, actionData) ->
                 EventManager.actions.forEach { currentAction ->
@@ -39,7 +39,7 @@ object FollowEvent : TwitchEvent<FollowEventData>(followEventId) {
                     ) {
                         currentAction.runSafe(
                             player,
-                            TwitchExecutorData(it.user.name),
+                            TwitchExecutorData(it.data.displayName),
                             actionData
                         )
                     }

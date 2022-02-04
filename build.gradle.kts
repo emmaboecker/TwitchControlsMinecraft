@@ -1,11 +1,8 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-
 plugins {
-	id("fabric-loom") version "0.10-SNAPSHOT"
-	val kotlinVersion: String by System.getProperties()
-	kotlin("jvm") version kotlinVersion
-	kotlin("plugin.serialization") version kotlinVersion
-	id("com.github.johnrengelman.shadow") version "7.1.2"
+    id("fabric-loom") version "0.10-SNAPSHOT"
+    val kotlinVersion: String by System.getProperties()
+    kotlin("jvm") version kotlinVersion
+    kotlin("plugin.serialization") version kotlinVersion
 }
 
 group = "net.stckoverflw"
@@ -19,7 +16,7 @@ val mod_version: String by project
 val maven_group: String by project
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
 val minecraft_version: String by project
@@ -30,68 +27,90 @@ val fabric_version: String by project
 val fabric_kotlin_version: String by project
 val fabrikmc_version: String by project
 
+val includeTransitive: Configuration by configurations.creating
+
 dependencies {
-	minecraft("com.mojang:minecraft:$minecraft_version")
-	mappings("net.fabricmc:yarn:$yarn_mappings:v2")
+    minecraft("com.mojang:minecraft:$minecraft_version")
+    mappings("net.fabricmc:yarn:$yarn_mappings:v2")
 
-	implementation("com.github.twitch4j:twitch4j:1.8.0")
+    includeTransitive(implementation("com.github.twitch4j:twitch4j:1.8.0")!!)
+    includeTransitive(implementation("ch.qos.logback:logback-classic:1.2.10")!!)
 
-	modImplementation("net.fabricmc:fabric-loader:$loader_version")
-	modImplementation("net.fabricmc.fabric-api:fabric-api:$fabric_version")
+    modImplementation("net.fabricmc:fabric-loader:$loader_version")
+    modImplementation("net.fabricmc.fabric-api:fabric-api:$fabric_version")
 
-	modImplementation("net.fabricmc:fabric-language-kotlin:$fabric_kotlin_version")
-	modImplementation("net.axay:fabrikmc-core:$fabrikmc_version")
-	modImplementation("net.axay:fabrikmc-commands:$fabrikmc_version")
-	modImplementation("net.axay:fabrikmc-igui:$fabrikmc_version")
-	modImplementation("net.axay:fabrikmc-persistence:$fabrikmc_version")
+    modImplementation("net.fabricmc:fabric-language-kotlin:$fabric_kotlin_version")
+    modImplementation("net.axay:fabrikmc-core:$fabrikmc_version")
+    modImplementation("net.axay:fabrikmc-commands:$fabrikmc_version")
+    modImplementation("net.axay:fabrikmc-igui:$fabrikmc_version")
+    modImplementation("net.axay:fabrikmc-persistence:$fabrikmc_version")
+
+    handleIncludes(project, includeTransitive)
 }
 
 kotlin {
-	jvmToolchain {
-		(this as JavaToolchainSpec).languageVersion.set(JavaLanguageVersion.of(17))
-	}
+    jvmToolchain {
+        (this as JavaToolchainSpec).languageVersion.set(JavaLanguageVersion.of(17))
+    }
 }
 
 tasks {
-	withType<JavaCompile> {
-		options.encoding = "UTF-8"
+    withType<JavaCompile> {
+        options.encoding = "UTF-8"
 
-		options.release.set(17)
-	}
+        options.release.set(17)
+    }
 
 
-	withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-		kotlinOptions {
-			jvmTarget = "17"
-			freeCompilerArgs = freeCompilerArgs + "-opt-in=kotlin.RequiresOptIn"
-		}
-	}
+    withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+        kotlinOptions {
+            jvmTarget = "17"
+            freeCompilerArgs = freeCompilerArgs + "-opt-in=kotlin.RequiresOptIn"
+        }
+    }
 
-	remapJar {
-		val shadowJar = getByName<ShadowJar>("shadowJar")
-		dependsOn(shadowJar)
-		mustRunAfter(shadowJar)
-		input.set(shadowJar.archiveFile)
-	}
+    processResources {
+        inputs.property("version", project.version)
 
-	shadowJar {
+        filesMatching("fabric.mod.json") {
+            this.expand("version" to project.version)
+        }
+    }
 
-		dependencies {
-			include(dependency("com.github.twitch4j:twitch4j"))
-		}
-	}
+    jar {
+        from("LICENSE") {
+            rename { "${it}_${archives_base_name}" }
+        }
+    }
+}
 
-	processResources {
-		inputs.property("version", project.version)
+// From: https://github.com/jakobkmar/fabrikmc/blob/3ed6145065f89d629b88f31ed3b99daa2a892be4/buildSrc/src/main/kotlin/TransitiveInclude.kt
 
-		filesMatching("fabric.mod.json") {
-			this.expand("version" to project.version)
-		}
-	}
+fun DependencyHandlerScope.includeTransitive(
+    dependencies: Set<ResolvedDependency>,
+    fabricLanguageKotlinDependency: ResolvedDependency,
+    checkedDependencies: MutableSet<ResolvedDependency> = HashSet()
+) {
+    dependencies.forEach {
+        if (checkedDependencies.contains(it) || (it.moduleGroup == "org.jetbrains.kotlin" && it.moduleName.startsWith("kotlin-stdlib")))
+            return@forEach
 
-	jar {
-		from("LICENSE") {
-			rename { "${it}_${archives_base_name}" }
-		}
-	}
+        if (fabricLanguageKotlinDependency.children.any { kotlinDep -> kotlinDep.name == it.name }) {
+            println("Skipping -> ${it.name} (already in fabric-language-kotlin)")
+        } else {
+            "include"(it.name)
+            println("Including -> ${it.name}")
+        }
+        checkedDependencies += it
+
+        includeTransitive(it.children, fabricLanguageKotlinDependency, checkedDependencies)
+    }
+}
+
+fun DependencyHandlerScope.handleIncludes(project: Project, configuration: Configuration) {
+    includeTransitive(
+        configuration.resolvedConfiguration.firstLevelModuleDependencies,
+        project.configurations.getByName("modImplementation").resolvedConfiguration.firstLevelModuleDependencies
+            .first { it.moduleGroup == "net.fabricmc" && it.moduleName == "fabric-language-kotlin" }
+    )
 }

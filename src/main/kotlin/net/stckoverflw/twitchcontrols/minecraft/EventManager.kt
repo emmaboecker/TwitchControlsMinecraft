@@ -48,6 +48,7 @@ object EventManager {
     }
 
     fun saveProfiles() {
+        profilePath.createDirectories()
         profiles.forEach {
             val propertiesFileName =
                 it.player + "-" + it.name.lowercase().replace("\\W".toRegex(), "") + ".profile.json"

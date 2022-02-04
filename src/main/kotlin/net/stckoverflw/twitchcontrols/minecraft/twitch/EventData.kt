@@ -52,5 +52,5 @@ data class SubGiftMultipleEventData(
     @Contextual val amountRange: IntRange? = null
 ) : EventData() {
     override fun toString(): String =
-        "one action for multiple subs gifted".plus(if (amountRange != null) "with min months ${amountRange.first} and max ${amountRange.last}" else "")
+        "one action for multiple subs gifted ".plus(if (amountRange != null) "with min months ${amountRange.first} and max ${amountRange.last}" else "")
 }

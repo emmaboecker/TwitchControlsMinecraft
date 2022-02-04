@@ -32,12 +32,12 @@ object SubscribeEvent : TwitchEvent<SubscribeEventData>(subscribeEventId) {
     }
 
     override fun gui(player: PlayerEntity): Gui = igui(GuiType.NINE_BY_FIVE, "§9Subscription".literal, 1) {
-        val monthsRangeProperty = GuiProperty(0..0)
+        val monthsRangeProperty = GuiProperty(1..1)
         page(1, 1) {
             placeholder(Slots.All, grayPlaceholder)
 
             button(
-                4 sl 3, GuiIcon.VariableIcon(
+                4 sl 7, GuiIcon.VariableIcon(
                     monthsRangeProperty,
                     monthsRangeProperty.guiIcon {
                         itemStack(Items.FEATHER, 1) {
@@ -69,7 +69,7 @@ object SubscribeEvent : TwitchEvent<SubscribeEventData>(subscribeEventId) {
             }
 
             button(
-                4 sl 7, GuiIcon.VariableIcon(
+                4 sl 3, GuiIcon.VariableIcon(
                     monthsRangeProperty,
                     monthsRangeProperty.guiIcon {
                         itemStack(Items.BOOK, 1) {
@@ -100,7 +100,7 @@ object SubscribeEvent : TwitchEvent<SubscribeEventData>(subscribeEventId) {
                 it.rangeChangerMax(monthsRangeProperty)
             }
 
-            button(3 sl 5, GuiIcon.VariableIcon(monthsRangeProperty, monthsRangeProperty.guiIcon {
+            button(2 sl 5, GuiIcon.VariableIcon(monthsRangeProperty, monthsRangeProperty.guiIcon {
                 itemStack(Items.WRITABLE_BOOK, 1) {
                     setCustomName("Confirm".literal.formatted(Formatting.GREEN))
                     setLore(

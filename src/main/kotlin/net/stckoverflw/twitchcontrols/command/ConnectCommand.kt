@@ -15,6 +15,9 @@ fun LiteralCommandBuilder<ServerCommandSource>.connectCommand() = literal("conne
             runs {
                 source.player.twitchToken = twitchToken()
                 source.sendFeedback("Twitch Token successfully set".literal.formatted(Formatting.GREEN), false)
+                createTwitchClient(source.player)?.let {
+                    source.player.sendMessage("Now listening to channel".literal.formatted(Formatting.GREEN), false)
+                }
             }
         }
     }
@@ -23,8 +26,10 @@ fun LiteralCommandBuilder<ServerCommandSource>.connectCommand() = literal("conne
             runs {
                 val twitchChannelName = twitchChannel()
                 source.player.twitchChannel = twitchChannelName
-                source.sendFeedback("Now listening to $twitchChannelName".literal.formatted(Formatting.GREEN), false)
-                createTwitchClient(source.player)
+                source.sendFeedback("Set channel to $twitchChannelName".literal.formatted(Formatting.GREEN), false)
+                createTwitchClient(source.player)?.let {
+                    source.player.sendMessage("Now listening to channel".literal.formatted(Formatting.GREEN), false)
+                }
             }
         }
     }

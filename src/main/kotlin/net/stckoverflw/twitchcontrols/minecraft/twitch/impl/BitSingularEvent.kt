@@ -1,6 +1,6 @@
 package net.stckoverflw.twitchcontrols.minecraft.twitch.impl
 
-import com.github.twitch4j.eventsub.events.ChannelSubscriptionGiftEvent
+import com.github.twitch4j.chat.events.channel.CheerEvent
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
 import net.axay.fabrik.core.item.itemStack
@@ -16,23 +16,23 @@ import net.stckoverflw.twitchcontrols.gui.item.grayPlaceholder
 import net.stckoverflw.twitchcontrols.gui.selectActionGUI
 import net.stckoverflw.twitchcontrols.minecraft.EventManager
 import net.stckoverflw.twitchcontrols.minecraft.action.TwitchExecutorData
-import net.stckoverflw.twitchcontrols.minecraft.twitch.SubGiftMultipleEventData
-import net.stckoverflw.twitchcontrols.minecraft.twitch.SubGiftSingularEventData
+import net.stckoverflw.twitchcontrols.minecraft.twitch.BitMultipleEventData
+import net.stckoverflw.twitchcontrols.minecraft.twitch.BitSingularEventData
 import net.stckoverflw.twitchcontrols.minecraft.twitch.TwitchEvent
 import net.stckoverflw.twitchcontrols.util.JSON
 import net.stckoverflw.twitchcontrols.util.rangeChangerMax
 import net.stckoverflw.twitchcontrols.util.rangeChangerMin
 import com.github.philippheuer.events4j.core.EventManager as TwitchEventManager
 
-const val subGiftMultipleEventId = "subscription-gift-multiple"
+const val bitSingularEventId = "bit-cheer-single"
 
-object SubGiftMultipleEvent : TwitchEvent<SubGiftSingularEventData>(subGiftMultipleEventId) {
-    override val icon: ItemStack = itemStack(Items.AMETHYST_SHARD, 1) {
-        setCustomName("Sub gift (one action for all gifts)".literal.formatted(Formatting.AQUA))
+object BitSingularEvent : TwitchEvent<BitSingularEventData>(bitSingularEventId) {
+    override val icon: ItemStack = itemStack(Items.BRICK, 1) {
+        setCustomName("Bits cheered (Action is repeated for every bit)".literal.formatted(Formatting.AQUA))
     }
 
     override fun gui(player: PlayerEntity): Gui =
-        igui(GuiType.NINE_BY_FIVE, "§9Sub gift (Action for every sub)".literal, 1) {
+        igui(GuiType.NINE_BY_FIVE, "§9Bit cheer (Action for every bit)".literal, 1) {
             val amountRangeProperty = GuiProperty(1..1)
             page(1, 1) {
                 placeholder(Slots.All, grayPlaceholder)
@@ -43,19 +43,19 @@ object SubGiftMultipleEvent : TwitchEvent<SubGiftSingularEventData>(subGiftMulti
                         amountRangeProperty.guiIcon {
                             itemStack(Items.FEATHER, 1) {
                                 setCustomName(
-                                    "Minimal Gifts: ".literal.formatted(Formatting.AQUA)
+                                    "Minimal Bits: ".literal.formatted(Formatting.AQUA)
                                         .append(it.first.toString().literal.formatted(Formatting.BLUE))
                                 )
                                 setLore(
                                     listOf(
-                                        "The minimal amount of subs required to trigger this action".literal.formatted(
+                                        "The minimal amount of bits required to trigger this action".literal.formatted(
                                             Formatting.GRAY
                                         ),
                                         "".literal,
                                         "Click to higher, shift click to lower".literal.formatted(Formatting.GRAY),
                                         "".literal,
                                         "Attention! ".literal.formatted(Formatting.RED).append(
-                                            "If there are multiple actions crossing the same range of subs,".literal.formatted(
+                                            "If there are multiple actions crossing the same range of bits,".literal.formatted(
                                                 Formatting.GRAY
                                             )
                                         ),
@@ -75,19 +75,19 @@ object SubGiftMultipleEvent : TwitchEvent<SubGiftSingularEventData>(subGiftMulti
                         amountRangeProperty.guiIcon {
                             itemStack(Items.BOOK, 1) {
                                 setCustomName(
-                                    "Maximal Gifts: ".literal.formatted(Formatting.AQUA)
+                                    "Maximal Bits: ".literal.formatted(Formatting.AQUA)
                                         .append(it.last.toString().literal.formatted(Formatting.BLUE))
                                 )
                                 setLore(
                                     listOf(
-                                        "The maximal amount of subs required to trigger this action".literal.formatted(
+                                        "The maximal amount of bits required to trigger this action".literal.formatted(
                                             Formatting.GRAY
                                         ),
                                         "".literal,
                                         "Click to higher, shift click to lower".literal.formatted(Formatting.GRAY),
                                         "".literal,
                                         "Attention! ".literal.formatted(Formatting.RED).append(
-                                            "If there are multiple actions crossing the same range of subs,".literal.formatted(
+                                            "If there are multiple actions crossing the same range of bits,".literal.formatted(
                                                 Formatting.GRAY
                                             )
                                         ),
@@ -114,30 +114,24 @@ object SubGiftMultipleEvent : TwitchEvent<SubGiftSingularEventData>(subGiftMulti
                         )
                     }
                 }.iconGenerator)) {
-                    it.player.openGui(selectActionGUI(SubGiftMultipleEventData(amountRangeProperty.get())), 1)
+                    it.player.openGui(selectActionGUI(BitMultipleEventData(amountRangeProperty.get())), 1)
                 }
             }
         }
 
     override fun runEvent(eventManager: TwitchEventManager, player: PlayerEntity) {
-        eventManager.onEvent(ChannelSubscriptionGiftEvent::class.java) {
+        eventManager.onEvent(CheerEvent::class.java) {
             val activeProfile = EventManager.activeProfile[player.uuid] ?: return@onEvent
-            activeProfile.actions.forEach { (eventData, actionData) ->
+            activeProfile.actions.forEach { (_, actionData) ->
                 EventManager.actions.forEach { currentAction ->
                     if (currentAction.actionId == JSON.encodeToJsonElement(actionData).jsonObject["action"]
                             .toString().replace("\"", "")
                     ) {
-                        if (eventData !is SubGiftMultipleEventData) return@onEvent
-                        val subGiftAmountRange = eventData.amountRange
-                        if (subGiftAmountRange != null) {
-                            if (!(subGiftAmountRange.first <= it.total && subGiftAmountRange.last >= it.total)) return@onEvent
-                        }
                         currentAction.runSafe(
                             player,
-                            TwitchExecutorData(it.userName),
+                            TwitchExecutorData(it.user.name),
                             actionData
                         )
-
                     }
                 }
             }

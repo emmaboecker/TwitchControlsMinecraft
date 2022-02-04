@@ -29,6 +29,5 @@ abstract class Action<T : ActionData>(val actionId: String) {
 }
 
 data class TwitchExecutorData(
-    val executorName: String,
-    val amount: Int? = null
+    val executorName: String
 )

@@ -7,4 +7,6 @@ val mainCommand = command("tc") {
     connectCommand()
     reloadProfilesCommand()
     createProfileCommand()
+    simulateCommand()
+    stateCommand()
 }
