@@ -54,3 +54,21 @@ data class SubGiftMultipleEventData(
     override fun toString(): String =
         "one action for multiple subs gifted ".plus(if (amountRange != null) "with min months ${amountRange.first} and max ${amountRange.last}" else "")
 }
+
+@Serializable
+@SerialName(bitSingularEventId)
+data class BitSingularEventData(
+    @Contextual val amountRange: IntRange? = null
+) : EventData() {
+    override fun toString(): String =
+        "action repeated for every bit cheered ".plus(if (amountRange != null) "with min bits ${amountRange.first} and max ${amountRange.last}" else "")
+}
+
+@Serializable
+@SerialName(bitMultipleId)
+data class BitMultipleEventData(
+    @Contextual val amountRange: IntRange? = null
+) : EventData() {
+    override fun toString(): String =
+        "one action for all bits gifted ".plus(if (amountRange != null) "with min bits ${amountRange.first} and max ${amountRange.last}" else "")
+}

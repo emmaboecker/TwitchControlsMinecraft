@@ -30,7 +30,9 @@ object EventManager {
         FollowEvent,
         SubscribeEvent,
         SubGiftSingularEvent,
-        SubGiftMultipleEvent
+        SubGiftMultipleEvent,
+        BitSingularEvent,
+        BitMultipleEvent,
     )
 
     var profiles = emptyList<Profile>()

@@ -26,7 +26,7 @@ import com.github.philippheuer.events4j.core.EventManager as TwitchEventManager
 
 const val subGiftMultipleEventId = "subscription-gift-multiple"
 
-object SubGiftMultipleEvent : TwitchEvent<SubGiftSingularEventData>(subGiftMultipleEventId) {
+object SubGiftMultipleEvent : TwitchEvent<SubGiftSingularEventData>(bitMultipleId) {
     override val icon: ItemStack = itemStack(Items.AMETHYST_SHARD, 1) {
         setCustomName("Sub gift (one action for all gifts)".literal.formatted(Formatting.AQUA))
     }
