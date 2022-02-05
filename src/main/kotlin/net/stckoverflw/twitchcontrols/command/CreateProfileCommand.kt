@@ -12,7 +12,7 @@ fun LiteralCommandBuilder<ServerCommandSource>.createProfileCommand() = literal(
         runs {
             try {
                 val name = profileName().lowercase()
-                if (EventManager.profiles.any { it.name.lowercase() == name }) {
+                if (EventManager.getProfilesForPlayer(source.player).any { it.name.lowercase() == name }) {
                     source.sendError("There is already a profile with that name".literal.formatted(Formatting.RED))
                     return@runs
                 }

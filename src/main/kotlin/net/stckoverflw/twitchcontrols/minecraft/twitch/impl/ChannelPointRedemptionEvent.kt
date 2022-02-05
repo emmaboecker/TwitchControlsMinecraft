@@ -20,6 +20,7 @@ import net.stckoverflw.twitchcontrols.minecraft.twitch.ChannelPointRedemptionEve
 import net.stckoverflw.twitchcontrols.minecraft.twitch.TwitchEvent
 import net.stckoverflw.twitchcontrols.twitchEventsClients
 import net.stckoverflw.twitchcontrols.util.JSON
+import net.stckoverflw.twitchcontrols.util.playEventSound
 import net.stckoverflw.twitchcontrols.util.twitchChannel
 import net.stckoverflw.twitchcontrols.util.twitchToken
 import com.github.philippheuer.events4j.core.EventManager as TwitchEventManager
@@ -73,6 +74,7 @@ object ChannelPointRedemptionEvent : TwitchEvent<ChannelPointRedemptionEventData
 
     override fun runEvent(eventManager: TwitchEventManager, player: PlayerEntity) {
         eventManager.onEvent(RewardRedeemedEvent::class.java) {
+            player.playEventSound()
             val activeProfile = EventManager.activeProfile[player.uuid] ?: return@onEvent
             activeProfile.actions.forEach { (eventType, actionData) ->
                 if (eventType == ChannelPointRedemptionEventData(title = it.redemption.reward.title)) {

@@ -10,15 +10,24 @@ import net.stckoverflw.twitchcontrols.twitchEventsClients
 fun LiteralCommandBuilder<ServerCommandSource>.stateCommand() {
     literal("start") {
         runs {
-            if (twitchEventsClients[source.player.uuid] == null && createTwitchClient(source.player) != null) {
-                source.player.sendMessage(
-                    "Twitch Controls Minecraft by StckOverflw was started".literal.formatted(
-                        Formatting.GREEN
-                    ), false
-                )
+            if (twitchEventsClients[source.player.uuid] == null) {
+                source.player.sendMessage("Trying to start Twitch Controls".literal.formatted(Formatting.GOLD), false)
+                if (createTwitchClient(source.player) != null) {
+                    source.player.sendMessage(
+                        "Twitch Controls Minecraft by StckOverflw was started".literal.formatted(
+                            Formatting.GREEN
+                        ), false
+                    )
+                } else {
+                    source.player.sendMessage(
+                        "Couldn't connect twitch, make sure to set up your twitch channel correctly".literal.formatted(
+                            Formatting.GREEN
+                        ), false
+                    )
+                }
             } else {
                 source.player.sendMessage(
-                    "Couldn't connect Twitch, you probably didn't set you channel/token correctly yet".literal.formatted(
+                    "Twitch Controls Minecraft is already running".literal.formatted(
                         Formatting.RED
                     ), false
                 )

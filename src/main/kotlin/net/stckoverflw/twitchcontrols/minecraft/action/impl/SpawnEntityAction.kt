@@ -69,6 +69,11 @@ class SpawnEntityAction : Action<SpawnEntityData>(spawnEntityId) {
                         Registry.ENTITY_TYPE.getId(EntityType.WITHER),
                         Items.WITHER_SKELETON_SKULL.defaultStack,
                         "Wither".literal.formatted(Formatting.LIGHT_PURPLE),
+                    ),
+                    EntityEntry(
+                        Registry.ENTITY_TYPE.getId(EntityType.TNT),
+                        Items.TNT.defaultStack,
+                        "TNT".literal.formatted(Formatting.RED),
                     )
                 )).toGuiList(),
                 iconGenerator = {

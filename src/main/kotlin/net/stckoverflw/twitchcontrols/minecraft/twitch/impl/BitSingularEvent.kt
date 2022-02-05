@@ -20,6 +20,7 @@ import net.stckoverflw.twitchcontrols.minecraft.twitch.BitMultipleEventData
 import net.stckoverflw.twitchcontrols.minecraft.twitch.BitSingularEventData
 import net.stckoverflw.twitchcontrols.minecraft.twitch.TwitchEvent
 import net.stckoverflw.twitchcontrols.util.JSON
+import net.stckoverflw.twitchcontrols.util.playEventSound
 import net.stckoverflw.twitchcontrols.util.rangeChangerMax
 import net.stckoverflw.twitchcontrols.util.rangeChangerMin
 import com.github.philippheuer.events4j.core.EventManager as TwitchEventManager
@@ -28,11 +29,11 @@ const val bitSingularEventId = "bit-cheer-single"
 
 object BitSingularEvent : TwitchEvent<BitSingularEventData>(bitSingularEventId) {
     override val icon: ItemStack = itemStack(Items.BRICK, 1) {
-        setCustomName("Bits cheered (Action is repeated for every bit)".literal.formatted(Formatting.AQUA))
+        setCustomName("Bits cheered (Action is repeated for every bit cheered)".literal.formatted(Formatting.AQUA))
     }
 
     override fun gui(player: PlayerEntity): Gui =
-        igui(GuiType.NINE_BY_FIVE, "§9Bit cheer (Action for every bit)".literal, 1) {
+        igui(GuiType.NINE_BY_FIVE, "§9Bit cheer (Action for every bit cheered)".literal, 1) {
             val amountRangeProperty = GuiProperty(1..1)
             page(1, 1) {
                 placeholder(Slots.All, grayPlaceholder)
@@ -121,17 +122,23 @@ object BitSingularEvent : TwitchEvent<BitSingularEventData>(bitSingularEventId) 
 
     override fun runEvent(eventManager: TwitchEventManager, player: PlayerEntity) {
         eventManager.onEvent(CheerEvent::class.java) {
+            player.playEventSound()
             val activeProfile = EventManager.activeProfile[player.uuid] ?: return@onEvent
-            activeProfile.actions.forEach { (_, actionData) ->
+            activeProfile.actions.forEach { (eventData, actionData) ->
                 EventManager.actions.forEach { currentAction ->
                     if (currentAction.actionId == JSON.encodeToJsonElement(actionData).jsonObject["action"]
                             .toString().replace("\"", "")
                     ) {
-                        currentAction.runSafe(
-                            player,
-                            TwitchExecutorData(it.user.name),
-                            actionData
-                        )
+                        if (eventData is BitSingularEventData) {
+                            val bitAmountRange = eventData.amountRange
+                            if (bitAmountRange == null || (bitAmountRange.first <= it.bits && bitAmountRange.last >= it.bits)) {
+                                currentAction.runSafe(
+                                    player,
+                                    TwitchExecutorData(it.user.name),
+                                    actionData
+                                )
+                            }
+                        }
                     }
                 }
             }

@@ -9,11 +9,15 @@ import net.stckoverflw.twitchcontrols.minecraft.EventManager
 
 fun LiteralCommandBuilder<ServerCommandSource>.menuCommand() = literal("menu") {
     runs {
-        EventManager.profiles = EventManager.loadProfiles()
-        if (EventManager.activeProfile[source.player.uuid] != null) {
-            source.player.openGui(settingsGUI(source.player), 1)
-        } else {
-            source.player.openGui(profilesGUI(source.player), 1)
+        try {
+            EventManager.profiles = EventManager.loadProfiles()
+            if (EventManager.activeProfile[source.player.uuid] != null) {
+                source.player.openGui(settingsGUI(source.player), 1)
+            } else {
+                source.player.openGui(profilesGUI(source.player), 1)
+            }
+        } catch (ex: Exception) {
+            ex.printStackTrace()
         }
     }
 }

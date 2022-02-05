@@ -1,5 +1,10 @@
 package net.stckoverflw.twitchcontrols.command
 
+import com.github.twitch4j.chat.events.channel.CheerEvent
+import com.github.twitch4j.chat.events.channel.IRCMessageEvent
+import com.github.twitch4j.chat.flag.AutoModFlag
+import com.github.twitch4j.common.events.domain.EventChannel
+import com.github.twitch4j.common.events.domain.EventUser
 import com.github.twitch4j.pubsub.domain.ChannelPointsRedemption
 import com.github.twitch4j.pubsub.domain.ChannelPointsReward
 import com.github.twitch4j.pubsub.domain.ChannelPointsUser
@@ -12,6 +17,7 @@ import net.axay.fabrik.core.text.literal
 import net.minecraft.server.command.ServerCommandSource
 import net.minecraft.util.Formatting
 import net.stckoverflw.twitchcontrols.twitchEventsClients
+import net.stckoverflw.twitchcontrols.util.twitchChannel
 import java.time.Instant
 
 private const val SimulationUser = "StckOverflw"
@@ -21,6 +27,7 @@ fun LiteralCommandBuilder<ServerCommandSource>.simulateCommand() = literal("simu
     try {
         simulateFollowCommand()
         simulateChannelPointsCommand()
+        simulateCheerBitsCommand()
     } catch (ex: Exception) {
         ex.printStackTrace()
     }
@@ -57,6 +64,30 @@ private fun LiteralCommandBuilder<ServerCommandSource>.simulateChannelPointsComm
                             this.login = SimulationUser.lowercase()
                         }
                     }
+                )
+            )
+        }
+    }
+}
+
+private fun LiteralCommandBuilder<ServerCommandSource>.simulateCheerBitsCommand() = literal("bits") {
+    argument<Int>("amount") { amountArg ->
+        runs {
+            simulateEvent(
+                CheerEvent(
+                    IRCMessageEvent(
+                        "take some pennys",
+                        mapOf(source.player.twitchChannel to source.player.name.string),
+                        mapOf(source.player.name.string to source.player.twitchChannel),
+                        listOf(SimulationId)
+                    ),
+                    EventChannel(source.player.twitchChannel, source.player.name.string),
+                    EventUser(SimulationId, SimulationUser),
+                    "take some pennys",
+                    amountArg(),
+                    0,
+                    1,
+                    listOf(AutoModFlag.builder().build())
                 )
             )
         }

@@ -16,6 +16,7 @@ import net.stckoverflw.twitchcontrols.minecraft.action.TwitchExecutorData
 import net.stckoverflw.twitchcontrols.minecraft.twitch.FollowEventData
 import net.stckoverflw.twitchcontrols.minecraft.twitch.TwitchEvent
 import net.stckoverflw.twitchcontrols.util.JSON
+import net.stckoverflw.twitchcontrols.util.playEventSound
 import java.util.*
 import com.github.philippheuer.events4j.core.EventManager as TwitchEventManager
 
@@ -31,6 +32,7 @@ object FollowEvent : TwitchEvent<FollowEventData>(followEventId) {
 
     override fun runEvent(eventManager: TwitchEventManager, player: PlayerEntity) {
         eventManager.onEvent(FollowingEvent::class.java) {
+            player.playEventSound()
             val activeProfile = EventManager.activeProfile[player.uuid] ?: return@onEvent
             activeProfile.actions.forEach { (_, actionData) ->
                 EventManager.actions.forEach { currentAction ->

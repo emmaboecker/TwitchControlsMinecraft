@@ -5,10 +5,7 @@ import kotlinx.serialization.encodeToString
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.entity.player.PlayerEntity
 import net.stckoverflw.twitchcontrols.MOD_ID
-import net.stckoverflw.twitchcontrols.minecraft.action.impl.AddPotionEffectAction
-import net.stckoverflw.twitchcontrols.minecraft.action.impl.GiveItemAction
-import net.stckoverflw.twitchcontrols.minecraft.action.impl.LitPlayerOnFireAction
-import net.stckoverflw.twitchcontrols.minecraft.action.impl.SpawnEntityAction
+import net.stckoverflw.twitchcontrols.minecraft.action.impl.*
 import net.stckoverflw.twitchcontrols.minecraft.twitch.impl.*
 import net.stckoverflw.twitchcontrols.util.JSON
 import java.util.*
@@ -22,7 +19,10 @@ object EventManager {
         SpawnEntityAction(),
         LitPlayerOnFireAction(),
         GiveItemAction(),
-        AddPotionEffectAction()
+        AddPotionEffectAction(),
+        PlaceLavaAction(),
+        TpUpAction(),
+        RandomTeleportAction()
     )
 
     val twitchEvents = listOf(
@@ -39,14 +39,16 @@ object EventManager {
     var activeProfile = hashMapOf<UUID, Profile?>()
 
     operator fun invoke() {
-        profilePath.createDirectories()
         profiles = loadProfiles()
     }
 
     fun getProfilesForPlayer(player: PlayerEntity) = profiles.filter { it.player == player.uuidAsString }
 
-    fun loadProfiles(): List<Profile> = profilePath.listDirectoryEntries("*.profile.json").map {
-        JSON.decodeFromString(it.readText())
+    fun loadProfiles(): List<Profile> {
+        profilePath.createDirectories()
+        return profilePath.listDirectoryEntries("*.profile.json").map {
+            JSON.decodeFromString(it.readText())
+        }
     }
 
     fun saveProfiles() {

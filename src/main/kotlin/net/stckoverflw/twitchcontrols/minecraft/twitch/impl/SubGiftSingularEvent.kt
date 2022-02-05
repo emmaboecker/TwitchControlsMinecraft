@@ -19,11 +19,12 @@ import net.stckoverflw.twitchcontrols.minecraft.action.TwitchExecutorData
 import net.stckoverflw.twitchcontrols.minecraft.twitch.SubGiftSingularEventData
 import net.stckoverflw.twitchcontrols.minecraft.twitch.TwitchEvent
 import net.stckoverflw.twitchcontrols.util.JSON
+import net.stckoverflw.twitchcontrols.util.playEventSound
 import com.github.philippheuer.events4j.core.EventManager as TwitchEventManager
 
 const val subGiftSingularEventId = "subscription-gift-single"
 
-object SubGiftSingularEvent : TwitchEvent<SubGiftSingularEventData>(bitSingularEventId) {
+object SubGiftSingularEvent : TwitchEvent<SubGiftSingularEventData>(subGiftSingularEventId) {
     override val icon: ItemStack = itemStack(Items.AMETHYST_SHARD, 1) {
         setCustomName("Sub gift (Action for every sub)".literal.formatted(Formatting.AQUA))
     }
@@ -68,6 +69,7 @@ object SubGiftSingularEvent : TwitchEvent<SubGiftSingularEventData>(bitSingularE
 
     override fun runEvent(eventManager: TwitchEventManager, player: PlayerEntity) {
         eventManager.onEvent(SubscriptionEvent::class.java) {
+            player.playEventSound()
             val activeProfile = EventManager.activeProfile[player.uuid] ?: return@onEvent
             activeProfile.actions.forEach { (eventData, actionData) ->
                 EventManager.actions.forEach { currentAction ->

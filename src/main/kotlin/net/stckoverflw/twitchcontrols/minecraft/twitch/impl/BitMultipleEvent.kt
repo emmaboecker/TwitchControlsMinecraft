@@ -19,6 +19,7 @@ import net.stckoverflw.twitchcontrols.minecraft.action.TwitchExecutorData
 import net.stckoverflw.twitchcontrols.minecraft.twitch.BitMultipleEventData
 import net.stckoverflw.twitchcontrols.minecraft.twitch.TwitchEvent
 import net.stckoverflw.twitchcontrols.util.JSON
+import net.stckoverflw.twitchcontrols.util.playEventSound
 import net.stckoverflw.twitchcontrols.util.rangeChangerMax
 import net.stckoverflw.twitchcontrols.util.rangeChangerMin
 import com.github.philippheuer.events4j.core.EventManager as TwitchEventManager
@@ -121,18 +122,25 @@ object BitMultipleEvent : TwitchEvent<BitMultipleEventData>(bitMultipleId) {
 
     override fun runEvent(eventManager: TwitchEventManager, player: PlayerEntity) {
         eventManager.onEvent(CheerEvent::class.java) {
+            player.playEventSound()
             val activeProfile = EventManager.activeProfile[player.uuid] ?: return@onEvent
-            activeProfile.actions.forEach { (_, actionData) ->
+            activeProfile.actions.forEach { (eventData, actionData) ->
                 EventManager.actions.forEach { currentAction ->
                     if (currentAction.actionId == JSON.encodeToJsonElement(actionData).jsonObject["action"]
                             .toString().replace("\"", "")
                     ) {
-                        currentAction.runSafe(
-                            player,
-                            TwitchExecutorData(it.user.name),
-                            actionData
-                        )
-
+                        if (eventData is BitMultipleEventData) {
+                            val bitAmountRange = eventData.amountRange
+                            if (bitAmountRange == null || (bitAmountRange.first <= it.bits && bitAmountRange.last >= it.bits)) {
+                                for (i in 0 until it.bits) {
+                                    currentAction.runSafe(
+                                        player,
+                                        TwitchExecutorData(it.user.name),
+                                        actionData
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }

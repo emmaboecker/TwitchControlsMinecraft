@@ -20,6 +20,7 @@ import net.stckoverflw.twitchcontrols.minecraft.twitch.SubGiftMultipleEventData
 import net.stckoverflw.twitchcontrols.minecraft.twitch.SubGiftSingularEventData
 import net.stckoverflw.twitchcontrols.minecraft.twitch.TwitchEvent
 import net.stckoverflw.twitchcontrols.util.JSON
+import net.stckoverflw.twitchcontrols.util.playEventSound
 import net.stckoverflw.twitchcontrols.util.rangeChangerMax
 import net.stckoverflw.twitchcontrols.util.rangeChangerMin
 import com.github.philippheuer.events4j.core.EventManager as TwitchEventManager
@@ -121,23 +122,23 @@ object SubGiftMultipleEvent : TwitchEvent<SubGiftSingularEventData>(bitMultipleI
 
     override fun runEvent(eventManager: TwitchEventManager, player: PlayerEntity) {
         eventManager.onEvent(ChannelSubscriptionGiftEvent::class.java) {
+            player.playEventSound()
             val activeProfile = EventManager.activeProfile[player.uuid] ?: return@onEvent
             activeProfile.actions.forEach { (eventData, actionData) ->
                 EventManager.actions.forEach { currentAction ->
                     if (currentAction.actionId == JSON.encodeToJsonElement(actionData).jsonObject["action"]
                             .toString().replace("\"", "")
                     ) {
-                        if (eventData !is SubGiftMultipleEventData) return@onEvent
-                        val subGiftAmountRange = eventData.amountRange
-                        if (subGiftAmountRange != null) {
-                            if (!(subGiftAmountRange.first <= it.total && subGiftAmountRange.last >= it.total)) return@onEvent
+                        if (eventData is SubGiftMultipleEventData) {
+                            val subGiftAmountRange = eventData.amountRange
+                            if (subGiftAmountRange == null || (subGiftAmountRange.first <= it.total && subGiftAmountRange.last >= it.total)) {
+                                currentAction.runSafe(
+                                    player,
+                                    TwitchExecutorData(it.userName),
+                                    actionData
+                                )
+                            }
                         }
-                        currentAction.runSafe(
-                            player,
-                            TwitchExecutorData(it.userName),
-                            actionData
-                        )
-
                     }
                 }
             }
