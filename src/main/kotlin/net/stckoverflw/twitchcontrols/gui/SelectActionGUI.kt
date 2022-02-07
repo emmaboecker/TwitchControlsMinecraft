@@ -7,10 +7,13 @@ import net.stckoverflw.twitchcontrols.gui.item.grayPlaceholder
 import net.stckoverflw.twitchcontrols.minecraft.EventManager
 import net.stckoverflw.twitchcontrols.minecraft.addAction
 import net.stckoverflw.twitchcontrols.minecraft.twitch.EventData
+import net.stckoverflw.twitchcontrols.util.goBackButton
 
 fun selectActionGUI(eventData: EventData) = igui(GuiType.NINE_BY_FIVE, "§6Select an Action".literal, 1) {
     page(1, 1) {
         placeholder(Slots.All, grayPlaceholder)
+
+        goBackButton()
 
         compound(
             (2 sl 2) rectTo (4 sl 8),

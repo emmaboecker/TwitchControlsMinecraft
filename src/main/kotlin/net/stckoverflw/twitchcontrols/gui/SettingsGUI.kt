@@ -23,18 +23,18 @@ fun settingsGUI(player: PlayerEntity): Gui =
         page(1, 1) {
             placeholder(Slots.All, grayPlaceholder)
 
-            button(5 sl 4, itemStack(Items.NAME_TAG, 1) {
+            button(4 sl 2, itemStack(Items.NAME_TAG, 1) {
                 setCustomName("Profile selector".literal.formatted(Formatting.BLUE))
             }.guiIcon) {
                 it.player.openGui(profilesGUI(player), 1)
             }
 
-            changePageByKey(3 sl 2, itemStack(Items.ITEM_FRAME, 1) {
+            changePageByKey(2 sl 2, itemStack(Items.ITEM_FRAME, 1) {
                 setCustomName("Add Action".literal.formatted(Formatting.GREEN))
             }.guiIcon, 3)
 
-            compound(
-                (2 sl 4) rectTo (4 sl 8),
+            val compound = compound(
+                (1 sl 4) rectTo (5 sl 8),
                 EventManager.activeProfile[player.uuid]!!.actions.map { it.key to it.value }.toGuiList(),
                 iconGenerator = {
                     var itemStack: ItemStack = itemStack(Items.BARRIER, 1) {
@@ -64,6 +64,13 @@ fun settingsGUI(player: PlayerEntity): Gui =
                     event.player.openGui(settingsGUI(event.player), 1)
                 }
             )
+
+            compoundScrollForwards(1 sl 9, itemStack(Items.NETHERITE_BLOCK, 1) {
+                setCustomName("Scroll Forward".literal.formatted(Formatting.GREEN))
+            }.guiIcon, compound)
+            compoundScrollBackwards(2 sl 9, itemStack(Items.NETHERITE_BLOCK, 1) {
+                setCustomName("Scroll Backwards".literal.formatted(Formatting.RED))
+            }.guiIcon, compound)
         }
         page(3, 2) {
             placeholder(Slots.All, grayPlaceholder)

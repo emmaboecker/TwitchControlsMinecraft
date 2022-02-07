@@ -1,8 +1,6 @@
 package net.stckoverflw.twitchcontrols.minecraft.twitch.impl
 
-import com.github.twitch4j.chat.events.channel.SubscriptionEvent
-import kotlinx.serialization.json.encodeToJsonElement
-import kotlinx.serialization.json.jsonObject
+import com.github.twitch4j.pubsub.events.ChannelSubGiftEvent
 import net.axay.fabrik.core.item.itemStack
 import net.axay.fabrik.core.item.setLore
 import net.axay.fabrik.core.text.literal
@@ -14,28 +12,96 @@ import net.minecraft.item.Items
 import net.minecraft.util.Formatting
 import net.stckoverflw.twitchcontrols.gui.item.grayPlaceholder
 import net.stckoverflw.twitchcontrols.gui.selectActionGUI
-import net.stckoverflw.twitchcontrols.minecraft.EventManager
-import net.stckoverflw.twitchcontrols.minecraft.action.TwitchExecutorData
 import net.stckoverflw.twitchcontrols.minecraft.twitch.SubGiftSingularEventData
 import net.stckoverflw.twitchcontrols.minecraft.twitch.TwitchEvent
-import net.stckoverflw.twitchcontrols.util.JSON
-import net.stckoverflw.twitchcontrols.util.playEventSound
-import com.github.philippheuer.events4j.core.EventManager as TwitchEventManager
+import net.stckoverflw.twitchcontrols.util.goBackButton
+import net.stckoverflw.twitchcontrols.util.rangeChangerMax
+import net.stckoverflw.twitchcontrols.util.rangeChangerMin
 
 const val subGiftSingularEventId = "subscription-gift-single"
 
-object SubGiftSingularEvent : TwitchEvent<SubGiftSingularEventData>(subGiftSingularEventId) {
+object SubGiftSingularEvent : TwitchEvent<SubGiftSingularEventData, ChannelSubGiftEvent>(
+    subGiftSingularEventId,
+    ChannelSubGiftEvent::class.java
+) {
     override val icon: ItemStack = itemStack(Items.AMETHYST_SHARD, 1) {
-        setCustomName("Sub gift (Action for every sub)".literal.formatted(Formatting.AQUA))
+        setCustomName("Sub gift (one action for all gifts)".literal.formatted(Formatting.AQUA))
     }
 
     override fun gui(player: PlayerEntity): Gui =
-        igui(GuiType.NINE_BY_FIVE, "§9Sub gift (Action for every sub)".literal, 1) {
+        igui(GuiType.NINE_BY_FIVE, "§9Sub gift (one action for all gifts)".literal, 1) {
             val useGifersNameProperty = GuiProperty(true)
+            val amountRangeProperty = GuiProperty(1..1)
             page(1, 1) {
                 placeholder(Slots.All, grayPlaceholder)
 
-                button(3 sl 4, GuiIcon.VariableIcon(useGifersNameProperty, useGifersNameProperty.guiIcon {
+                goBackButton()
+
+                button(
+                    4 sl 3, GuiIcon.VariableIcon(
+                        amountRangeProperty,
+                        amountRangeProperty.guiIcon {
+                            itemStack(Items.FEATHER, 1) {
+                                setCustomName(
+                                    "Minimal Gifts: ".literal.formatted(Formatting.AQUA)
+                                        .append(it.first.toString().literal.formatted(Formatting.BLUE))
+                                )
+                                setLore(
+                                    listOf(
+                                        "The minimal amount of subs required to trigger this action".literal.formatted(
+                                            Formatting.GRAY
+                                        ),
+                                        "".literal,
+                                        "Click to higher, shift click to lower".literal.formatted(Formatting.GRAY),
+                                        "".literal,
+                                        "Attention! ".literal.formatted(Formatting.RED).append(
+                                            "If there are multiple actions crossing the same range of subs,".literal.formatted(
+                                                Formatting.GRAY
+                                            )
+                                        ),
+                                        "all actions will be triggered".literal.formatted(Formatting.RED)
+                                    )
+                                )
+                            }
+                        }.iconGenerator
+                    )
+                ) {
+                    it.rangeChangerMin(amountRangeProperty)
+                }
+
+                button(
+                    4 sl 7, GuiIcon.VariableIcon(
+                        amountRangeProperty,
+                        amountRangeProperty.guiIcon {
+                            itemStack(Items.BOOK, 1) {
+                                setCustomName(
+                                    "Maximal Gifts: ".literal.formatted(Formatting.AQUA)
+                                        .append(it.last.toString().literal.formatted(Formatting.BLUE))
+                                )
+                                setLore(
+                                    listOf(
+                                        "The maximal amount of subs required to trigger this action".literal.formatted(
+                                            Formatting.GRAY
+                                        ),
+                                        "".literal,
+                                        "Click to higher, shift click to lower".literal.formatted(Formatting.GRAY),
+                                        "".literal,
+                                        "Attention! ".literal.formatted(Formatting.RED).append(
+                                            "If there are multiple actions crossing the same range of subs,".literal.formatted(
+                                                Formatting.GRAY
+                                            )
+                                        ),
+                                        "all actions will be triggered".literal.formatted(Formatting.RED)
+                                    )
+                                )
+                            }
+                        }.iconGenerator
+                    )
+                ) {
+                    it.rangeChangerMax(amountRangeProperty)
+                }
+
+                button(2 sl 4, GuiIcon.VariableIcon(useGifersNameProperty, useGifersNameProperty.guiIcon {
                     itemStack(Items.NAME_TAG, 1) {
                         setCustomName("Use Gifters username".literal.formatted(if (it) Formatting.GREEN else Formatting.RED))
                         setLore(
@@ -52,41 +118,34 @@ object SubGiftSingularEvent : TwitchEvent<SubGiftSingularEventData>(subGiftSingu
                     useGifersNameProperty.set(!useGifersNameProperty.get())
                 }
 
-                button(3 sl 6, GuiIcon.VariableIcon(useGifersNameProperty, useGifersNameProperty.guiIcon {
+                button(2 sl 6, GuiIcon.VariableIcon(amountRangeProperty, amountRangeProperty.guiIcon {
                     itemStack(Items.WRITABLE_BOOK, 1) {
                         setCustomName("Confirm".literal.formatted(Formatting.GREEN))
                         setLore(
                             listOf(
-                                "using gifters name = $it".literal.formatted(Formatting.GRAY)
+                                "with rangle = ${it.first}<=..<=${it.last}".literal.formatted(Formatting.GRAY)
                             )
                         )
                     }
                 }.iconGenerator)) {
-                    it.player.openGui(selectActionGUI(SubGiftSingularEventData(useGifersNameProperty.get())), 1)
+                    it.player.openGui(
+                        selectActionGUI(
+                            SubGiftSingularEventData(
+                                useGifersNameProperty.get(),
+                                amountRangeProperty.get()
+                            )
+                        ), 1
+                    )
                 }
             }
         }
 
-    override fun runEvent(eventManager: TwitchEventManager, player: PlayerEntity) {
-        eventManager.onEvent(SubscriptionEvent::class.java) {
-            player.playEventSound()
-            val activeProfile = EventManager.activeProfile[player.uuid] ?: return@onEvent
-            activeProfile.actions.forEach { (eventData, actionData) ->
-                EventManager.actions.forEach { currentAction ->
-                    if (currentAction.actionId == JSON.encodeToJsonElement(actionData).jsonObject["action"]
-                            .toString().replace("\"", "")
-                    ) {
-                        if (eventData !is SubGiftSingularEventData) return@onEvent
-                        if (it.gifted) {
-                            currentAction.runSafe(
-                                player,
-                                TwitchExecutorData(if (eventData.useGifterName) it.giftedBy.name else it.user.name),
-                                actionData
-                            )
-                        }
-                    }
-                }
-            }
-        }
+    override fun runEvent(
+        event: ChannelSubGiftEvent,
+        eventData: SubGiftSingularEventData,
+        player: PlayerEntity
+    ): Pair<Boolean, String> {
+        val subGiftAmountRange = eventData.amountRange
+        return (subGiftAmountRange == null || (subGiftAmountRange.first <= event.data.count && subGiftAmountRange.last >= event.data.count)) to if (eventData.useGifterName) event.data.displayName else event.data.displayName
     }
 }

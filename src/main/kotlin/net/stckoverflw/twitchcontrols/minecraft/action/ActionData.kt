@@ -70,3 +70,20 @@ data class RandomTeleportData(
 ) : ActionData() {
     override fun toString(): String = "teleport player random in $radius blocks range"
 }
+
+@Serializable
+@SerialName(clearInventoryId)
+data class ClearInventoryData(
+    val keep: Int = 0
+) : ActionData() {
+    override fun toString(): String = "clear inventory"
+}
+
+@Serializable
+@SerialName(damageActionId)
+data class DamageData(
+    val damage: Int = 100
+) : ActionData() {
+    override fun toString(): String = "damage $damage"
+}
+

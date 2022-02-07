@@ -22,7 +22,7 @@ fun createTwitchClient(player: PlayerEntity): TwitchEventsClient? {
     val twitchChannel = player.twitchChannel
     val twitchToken = player.twitchToken
     return if (twitchChannel != null && twitchToken != null) {
-        twitchEventsClients[player.uuid] = TwitchEventsClient(player, twitchChannel, twitchToken)
+        twitchEventsClients[player.uuid] = TwitchEventsClient(player.uuid, twitchChannel, twitchToken)
         twitchEventsClients[player.uuid]
     } else {
         null

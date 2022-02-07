@@ -1,6 +1,6 @@
 plugins {
     id("fabric-loom") version "0.10-SNAPSHOT"
-    val kotlinVersion: String by System.getProperties()
+    val kotlinVersion = "1.6.10"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.serialization") version kotlinVersion
 }

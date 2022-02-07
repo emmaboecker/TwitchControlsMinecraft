@@ -17,7 +17,7 @@ const val randomTeleportActionId = "random-teleport"
 
 class RandomTeleportAction : Action<RandomTeleportData>(randomTeleportActionId) {
     override val icon: ItemStack = itemStack(Items.ENDER_PEARL, 1) {
-        setCustomName("Random Teleport in 1000 blocks radius".literal.formatted(Formatting.GOLD))
+        setCustomName("Random Teleport in 500 blocks radius".literal.formatted(Formatting.GOLD))
     }
 
     override fun run(player: PlayerEntity, twitchData: TwitchExecutorData, data: RandomTeleportData) {

@@ -1,8 +1,6 @@
 package net.stckoverflw.twitchcontrols.minecraft.twitch.impl
 
-import com.github.twitch4j.chat.events.channel.CheerEvent
-import kotlinx.serialization.json.encodeToJsonElement
-import kotlinx.serialization.json.jsonObject
+import com.github.twitch4j.pubsub.events.ChannelBitsEvent
 import net.axay.fabrik.core.item.itemStack
 import net.axay.fabrik.core.item.setLore
 import net.axay.fabrik.core.text.literal
@@ -14,29 +12,27 @@ import net.minecraft.item.Items
 import net.minecraft.util.Formatting
 import net.stckoverflw.twitchcontrols.gui.item.grayPlaceholder
 import net.stckoverflw.twitchcontrols.gui.selectActionGUI
-import net.stckoverflw.twitchcontrols.minecraft.EventManager
-import net.stckoverflw.twitchcontrols.minecraft.action.TwitchExecutorData
-import net.stckoverflw.twitchcontrols.minecraft.twitch.BitMultipleEventData
 import net.stckoverflw.twitchcontrols.minecraft.twitch.BitSingularEventData
 import net.stckoverflw.twitchcontrols.minecraft.twitch.TwitchEvent
-import net.stckoverflw.twitchcontrols.util.JSON
-import net.stckoverflw.twitchcontrols.util.playEventSound
+import net.stckoverflw.twitchcontrols.util.goBackButton
 import net.stckoverflw.twitchcontrols.util.rangeChangerMax
 import net.stckoverflw.twitchcontrols.util.rangeChangerMin
-import com.github.philippheuer.events4j.core.EventManager as TwitchEventManager
 
 const val bitSingularEventId = "bit-cheer-single"
 
-object BitSingularEvent : TwitchEvent<BitSingularEventData>(bitSingularEventId) {
+object BitSingularEvent :
+    TwitchEvent<BitSingularEventData, ChannelBitsEvent>(bitSingularEventId, ChannelBitsEvent::class.java) {
     override val icon: ItemStack = itemStack(Items.BRICK, 1) {
-        setCustomName("Bits cheered (Action is repeated for every bit cheered)".literal.formatted(Formatting.AQUA))
+        setCustomName("Bits cheered (one action for every bit)".literal.formatted(Formatting.AQUA))
     }
 
     override fun gui(player: PlayerEntity): Gui =
-        igui(GuiType.NINE_BY_FIVE, "§9Bit cheer (Action for every bit cheered)".literal, 1) {
+        igui(GuiType.NINE_BY_FIVE, "§9Bit cheer (one action for every bit)".literal, 1) {
             val amountRangeProperty = GuiProperty(1..1)
             page(1, 1) {
                 placeholder(Slots.All, grayPlaceholder)
+
+                goBackButton()
 
                 button(
                     4 sl 3, GuiIcon.VariableIcon(
@@ -115,33 +111,18 @@ object BitSingularEvent : TwitchEvent<BitSingularEventData>(bitSingularEventId) 
                         )
                     }
                 }.iconGenerator)) {
-                    it.player.openGui(selectActionGUI(BitMultipleEventData(amountRangeProperty.get())), 1)
+                    it.player.openGui(selectActionGUI(BitSingularEventData(amountRangeProperty.get())), 1)
                 }
             }
         }
 
-    override fun runEvent(eventManager: TwitchEventManager, player: PlayerEntity) {
-        eventManager.onEvent(CheerEvent::class.java) {
-            player.playEventSound()
-            val activeProfile = EventManager.activeProfile[player.uuid] ?: return@onEvent
-            activeProfile.actions.forEach { (eventData, actionData) ->
-                EventManager.actions.forEach { currentAction ->
-                    if (currentAction.actionId == JSON.encodeToJsonElement(actionData).jsonObject["action"]
-                            .toString().replace("\"", "")
-                    ) {
-                        if (eventData is BitSingularEventData) {
-                            val bitAmountRange = eventData.amountRange
-                            if (bitAmountRange == null || (bitAmountRange.first <= it.bits && bitAmountRange.last >= it.bits)) {
-                                currentAction.runSafe(
-                                    player,
-                                    TwitchExecutorData(it.user.name),
-                                    actionData
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
+    override fun runEvent(
+        event: ChannelBitsEvent,
+        eventData: BitSingularEventData,
+        player: PlayerEntity
+    ): Pair<Boolean, String> {
+        val bitAmountRange = eventData.amountRange
+        return (bitAmountRange == null || (bitAmountRange.first <= event.data.bitsUsed && bitAmountRange.last >= event.data.bitsUsed)) to (event.data.userName
+            ?: "Anonymous")
     }
 }

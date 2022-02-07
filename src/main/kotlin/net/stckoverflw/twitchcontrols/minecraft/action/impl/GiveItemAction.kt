@@ -20,6 +20,7 @@ import net.stckoverflw.twitchcontrols.minecraft.action.GiveItemData
 import net.stckoverflw.twitchcontrols.minecraft.action.TwitchExecutorData
 import net.stckoverflw.twitchcontrols.minecraft.addAction
 import net.stckoverflw.twitchcontrols.minecraft.twitch.EventData
+import net.stckoverflw.twitchcontrols.util.goBackButton
 
 const val giveItemId = "give-item"
 
@@ -40,9 +41,11 @@ class GiveItemAction : Action<GiveItemData>(giveItemId) {
         page(1, 1) {
             placeholder(Slots.All, grayPlaceholder)
 
+            goBackButton()
+
             val compound = compound(
                 (1 sl 2) rectTo (5 sl 8),
-                Registry.ITEM.toGuiList(),
+                Registry.ITEM.filter { it != Items.AIR }.toGuiList(),
                 iconGenerator = {
                     it.defaultStack
                 },

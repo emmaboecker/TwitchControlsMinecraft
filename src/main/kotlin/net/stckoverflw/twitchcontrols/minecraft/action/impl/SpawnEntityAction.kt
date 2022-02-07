@@ -25,6 +25,7 @@ import net.stckoverflw.twitchcontrols.minecraft.action.SpawnEntityData
 import net.stckoverflw.twitchcontrols.minecraft.action.TwitchExecutorData
 import net.stckoverflw.twitchcontrols.minecraft.addAction
 import net.stckoverflw.twitchcontrols.minecraft.twitch.EventData
+import net.stckoverflw.twitchcontrols.util.goBackButton
 
 const val spawnEntityId = "spawn-entity"
 
@@ -56,6 +57,8 @@ class SpawnEntityAction : Action<SpawnEntityData>(spawnEntityId) {
         page(1, 1) {
             placeholder(Slots.All, grayPlaceholder)
 
+            goBackButton()
+
             val compound = compound(
                 (1 sl 2) rectTo (5 sl 8),
                 (Registry.ITEM.filterIsInstance<SpawnEggItem>().map {
@@ -74,6 +77,11 @@ class SpawnEntityAction : Action<SpawnEntityData>(spawnEntityId) {
                         Registry.ENTITY_TYPE.getId(EntityType.TNT),
                         Items.TNT.defaultStack,
                         "TNT".literal.formatted(Formatting.RED),
+                    ),
+                    EntityEntry(
+                        Registry.ENTITY_TYPE.getId(EntityType.LIGHTNING_BOLT),
+                        Items.LIGHTNING_ROD.defaultStack,
+                        "Lightning".literal.formatted(Formatting.YELLOW),
                     )
                 )).toGuiList(),
                 iconGenerator = {
@@ -124,7 +132,7 @@ class SpawnEntityAction : Action<SpawnEntityData>(spawnEntityId) {
                     setCustomName("Add Action".literal.formatted(Formatting.GREEN))
                     setLore(
                         listOf(
-                            "Spawn ${it?.path}".literal.formatted(Formatting.GRAY)
+                            "Spawn selected entity on selected event".literal.formatted(Formatting.GRAY)
                         )
                     )
                 }

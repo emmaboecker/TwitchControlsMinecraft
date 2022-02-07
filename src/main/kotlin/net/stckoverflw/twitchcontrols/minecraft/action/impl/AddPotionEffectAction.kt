@@ -21,6 +21,7 @@ import net.stckoverflw.twitchcontrols.minecraft.action.AddPotionEffectData
 import net.stckoverflw.twitchcontrols.minecraft.action.TwitchExecutorData
 import net.stckoverflw.twitchcontrols.minecraft.addAction
 import net.stckoverflw.twitchcontrols.minecraft.twitch.EventData
+import net.stckoverflw.twitchcontrols.util.goBackButton
 
 const val addPotionEffectId = "add-potion-effect"
 
@@ -45,6 +46,8 @@ class AddPotionEffectAction : Action<AddPotionEffectData>(addPotionEffectId) {
         val durationProperty = GuiProperty(1)
         page(1, 1) {
             placeholder(Slots.All, grayPlaceholder)
+
+            goBackButton()
 
             val compound = compound(
                 (1 sl 2) rectTo (5 sl 8),

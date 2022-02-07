@@ -1,23 +1,13 @@
 package net.stckoverflw.twitchcontrols.command
 
-import com.github.twitch4j.chat.events.channel.CheerEvent
-import com.github.twitch4j.chat.events.channel.IRCMessageEvent
-import com.github.twitch4j.chat.flag.AutoModFlag
-import com.github.twitch4j.common.events.domain.EventChannel
-import com.github.twitch4j.common.events.domain.EventUser
-import com.github.twitch4j.pubsub.domain.ChannelPointsRedemption
-import com.github.twitch4j.pubsub.domain.ChannelPointsReward
-import com.github.twitch4j.pubsub.domain.ChannelPointsUser
-import com.github.twitch4j.pubsub.domain.FollowingData
-import com.github.twitch4j.pubsub.events.FollowingEvent
-import com.github.twitch4j.pubsub.events.RewardRedeemedEvent
+import com.github.twitch4j.pubsub.domain.*
+import com.github.twitch4j.pubsub.events.*
 import com.mojang.brigadier.context.CommandContext
 import net.axay.fabrik.commands.LiteralCommandBuilder
 import net.axay.fabrik.core.text.literal
 import net.minecraft.server.command.ServerCommandSource
 import net.minecraft.util.Formatting
 import net.stckoverflw.twitchcontrols.twitchEventsClients
-import net.stckoverflw.twitchcontrols.util.twitchChannel
 import java.time.Instant
 
 private const val SimulationUser = "StckOverflw"
@@ -26,6 +16,8 @@ private const val SimulationId = "000000000"
 fun LiteralCommandBuilder<ServerCommandSource>.simulateCommand() = literal("simulate") {
     try {
         simulateFollowCommand()
+        simulateSubCommand()
+        simulateSubGiftEventCommand()
         simulateChannelPointsCommand()
         simulateCheerBitsCommand()
     } catch (ex: Exception) {
@@ -74,21 +66,43 @@ private fun LiteralCommandBuilder<ServerCommandSource>.simulateCheerBitsCommand(
     argument<Int>("amount") { amountArg ->
         runs {
             simulateEvent(
-                CheerEvent(
-                    IRCMessageEvent(
-                        "take some pennys",
-                        mapOf(source.player.twitchChannel to source.player.name.string),
-                        mapOf(source.player.name.string to source.player.twitchChannel),
-                        listOf(SimulationId)
-                    ),
-                    EventChannel(source.player.twitchChannel, source.player.name.string),
-                    EventUser(SimulationId, SimulationUser),
-                    "take some pennys",
-                    amountArg(),
-                    0,
-                    1,
-                    listOf(AutoModFlag.builder().build())
-                )
+                ChannelBitsEvent(ChannelBitsData().apply {
+                    this.userId = SimulationId
+                    this.userName = SimulationUser
+                    this.bitsUsed = amountArg()
+                })
+            )
+        }
+    }
+}
+
+private fun LiteralCommandBuilder<ServerCommandSource>.simulateSubGiftEventCommand() = literal("sub-gifts") {
+    argument<Int>("amount") { amountArg ->
+        runs {
+            simulateEvent(
+                ChannelSubGiftEvent(SubGiftData().apply {
+                    this.userId = SimulationId
+                    this.userName = SimulationUser.lowercase()
+                    this.displayName = SimulationUser
+                    this.count = amountArg()
+                })
+            )
+        }
+    }
+}
+
+private fun LiteralCommandBuilder<ServerCommandSource>.simulateSubCommand() = literal("sub") {
+    argument<Int>("months") { monthsArg ->
+        runs {
+            simulateEvent(
+                ChannelSubscribeEvent(SubscriptionData().apply {
+                    this.userId = SimulationId
+                    this.userName = SimulationUser.lowercase()
+                    this.displayName = SimulationUser
+                    this.isGift = false
+                    this.cumulativeMonths = monthsArg()
+                    this.streakMonths = monthsArg()
+                })
             )
         }
     }

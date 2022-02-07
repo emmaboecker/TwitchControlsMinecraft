@@ -1,8 +1,6 @@
 package net.stckoverflw.twitchcontrols.minecraft.twitch.impl
 
-import com.github.twitch4j.eventsub.events.ChannelSubscriptionGiftEvent
-import kotlinx.serialization.json.encodeToJsonElement
-import kotlinx.serialization.json.jsonObject
+import com.github.twitch4j.pubsub.events.ChannelSubGiftEvent
 import net.axay.fabrik.core.item.itemStack
 import net.axay.fabrik.core.item.setLore
 import net.axay.fabrik.core.text.literal
@@ -14,29 +12,29 @@ import net.minecraft.item.Items
 import net.minecraft.util.Formatting
 import net.stckoverflw.twitchcontrols.gui.item.grayPlaceholder
 import net.stckoverflw.twitchcontrols.gui.selectActionGUI
-import net.stckoverflw.twitchcontrols.minecraft.EventManager
-import net.stckoverflw.twitchcontrols.minecraft.action.TwitchExecutorData
 import net.stckoverflw.twitchcontrols.minecraft.twitch.SubGiftMultipleEventData
-import net.stckoverflw.twitchcontrols.minecraft.twitch.SubGiftSingularEventData
 import net.stckoverflw.twitchcontrols.minecraft.twitch.TwitchEvent
-import net.stckoverflw.twitchcontrols.util.JSON
-import net.stckoverflw.twitchcontrols.util.playEventSound
+import net.stckoverflw.twitchcontrols.util.goBackButton
 import net.stckoverflw.twitchcontrols.util.rangeChangerMax
 import net.stckoverflw.twitchcontrols.util.rangeChangerMin
-import com.github.philippheuer.events4j.core.EventManager as TwitchEventManager
 
 const val subGiftMultipleEventId = "subscription-gift-multiple"
 
-object SubGiftMultipleEvent : TwitchEvent<SubGiftSingularEventData>(bitMultipleId) {
+object SubGiftMultipleEvent : TwitchEvent<SubGiftMultipleEventData, ChannelSubGiftEvent>(
+    subGiftMultipleEventId,
+    ChannelSubGiftEvent::class.java
+) {
     override val icon: ItemStack = itemStack(Items.AMETHYST_SHARD, 1) {
-        setCustomName("Sub gift (one action for all gifts)".literal.formatted(Formatting.AQUA))
+        setCustomName("Sub gift (action is repeated for every sub gifted)".literal.formatted(Formatting.AQUA))
     }
 
     override fun gui(player: PlayerEntity): Gui =
-        igui(GuiType.NINE_BY_FIVE, "§9Sub gift (Action for every sub)".literal, 1) {
+        igui(GuiType.NINE_BY_FIVE, "§9Sub gift (action is repeated for every sub gifted)".literal, 1) {
             val amountRangeProperty = GuiProperty(1..1)
             page(1, 1) {
                 placeholder(Slots.All, grayPlaceholder)
+
+                goBackButton()
 
                 button(
                     4 sl 3, GuiIcon.VariableIcon(
@@ -120,28 +118,12 @@ object SubGiftMultipleEvent : TwitchEvent<SubGiftSingularEventData>(bitMultipleI
             }
         }
 
-    override fun runEvent(eventManager: TwitchEventManager, player: PlayerEntity) {
-        eventManager.onEvent(ChannelSubscriptionGiftEvent::class.java) {
-            player.playEventSound()
-            val activeProfile = EventManager.activeProfile[player.uuid] ?: return@onEvent
-            activeProfile.actions.forEach { (eventData, actionData) ->
-                EventManager.actions.forEach { currentAction ->
-                    if (currentAction.actionId == JSON.encodeToJsonElement(actionData).jsonObject["action"]
-                            .toString().replace("\"", "")
-                    ) {
-                        if (eventData is SubGiftMultipleEventData) {
-                            val subGiftAmountRange = eventData.amountRange
-                            if (subGiftAmountRange == null || (subGiftAmountRange.first <= it.total && subGiftAmountRange.last >= it.total)) {
-                                currentAction.runSafe(
-                                    player,
-                                    TwitchExecutorData(it.userName),
-                                    actionData
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
+    override fun runEvent(
+        event: ChannelSubGiftEvent,
+        eventData: SubGiftMultipleEventData,
+        player: PlayerEntity
+    ): Pair<Boolean, String> {
+        val subGiftAmountRange = eventData.amountRange
+        return (subGiftAmountRange == null || (subGiftAmountRange.first <= event.data.count && subGiftAmountRange.last >= event.data.count)) to event.data.displayName
     }
 }

@@ -22,7 +22,9 @@ object EventManager {
         AddPotionEffectAction(),
         PlaceLavaAction(),
         TpUpAction(),
-        RandomTeleportAction()
+        RandomTeleportAction(),
+        ClearInventoryAction(),
+        KillAction()
     )
 
     val twitchEvents = listOf(

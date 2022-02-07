@@ -1,8 +1,13 @@
 package net.stckoverflw.twitchcontrols.util
 
-import net.axay.fabrik.igui.GuiActionType
+import net.axay.fabrik.core.item.itemStack
+import net.axay.fabrik.core.text.literal
+import net.axay.fabrik.igui.*
 import net.axay.fabrik.igui.events.GuiClickEvent
 import net.axay.fabrik.igui.observable.GuiProperty
+import net.minecraft.item.Items
+import net.minecraft.util.Formatting
+import net.stckoverflw.twitchcontrols.gui.settingsGUI
 
 suspend fun GuiClickEvent.rangeChangerMin(rangeProperty: GuiProperty<IntRange>) {
     val range = rangeProperty.get()
@@ -28,3 +33,10 @@ suspend fun GuiClickEvent.rangeChangerMax(rangeProperty: GuiProperty<IntRange>) 
         }
     }
 }
+
+fun GuiBuilder.PageBuilder.goBackButton(slots: GuiSlotCompound = 1 sl 1, text: String = "Go to main page") =
+    button(slots, itemStack(Items.KNOWLEDGE_BOOK, 1) {
+        setCustomName(text.literal.formatted(Formatting.AQUA))
+    }.guiIcon) {
+        it.player.openGui(settingsGUI(it.player), 1)
+    }

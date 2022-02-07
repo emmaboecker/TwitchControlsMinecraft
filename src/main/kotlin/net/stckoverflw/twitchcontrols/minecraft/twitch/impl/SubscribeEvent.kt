@@ -1,8 +1,6 @@
 package net.stckoverflw.twitchcontrols.minecraft.twitch.impl
 
-import com.github.twitch4j.chat.events.channel.SubscriptionEvent
-import kotlinx.serialization.json.encodeToJsonElement
-import kotlinx.serialization.json.jsonObject
+import com.github.twitch4j.pubsub.events.ChannelSubscribeEvent
 import net.axay.fabrik.core.item.itemStack
 import net.axay.fabrik.core.item.setLore
 import net.axay.fabrik.core.text.literal
@@ -14,19 +12,16 @@ import net.minecraft.item.Items
 import net.minecraft.util.Formatting
 import net.stckoverflw.twitchcontrols.gui.item.grayPlaceholder
 import net.stckoverflw.twitchcontrols.gui.selectActionGUI
-import net.stckoverflw.twitchcontrols.minecraft.EventManager
-import net.stckoverflw.twitchcontrols.minecraft.action.TwitchExecutorData
 import net.stckoverflw.twitchcontrols.minecraft.twitch.SubscribeEventData
 import net.stckoverflw.twitchcontrols.minecraft.twitch.TwitchEvent
-import net.stckoverflw.twitchcontrols.util.JSON
-import net.stckoverflw.twitchcontrols.util.playEventSound
+import net.stckoverflw.twitchcontrols.util.goBackButton
 import net.stckoverflw.twitchcontrols.util.rangeChangerMax
 import net.stckoverflw.twitchcontrols.util.rangeChangerMin
-import com.github.philippheuer.events4j.core.EventManager as TwitchEventManager
 
 const val subscribeEventId = "subscribe"
 
-object SubscribeEvent : TwitchEvent<SubscribeEventData>(subscribeEventId) {
+object SubscribeEvent :
+    TwitchEvent<SubscribeEventData, ChannelSubscribeEvent>(subscribeEventId, ChannelSubscribeEvent::class.java) {
 
     override val icon: ItemStack = itemStack(Items.DIAMOND, 1) {
         setCustomName("Subscription".literal.formatted(Formatting.BLUE))
@@ -37,8 +32,10 @@ object SubscribeEvent : TwitchEvent<SubscribeEventData>(subscribeEventId) {
         page(1, 1) {
             placeholder(Slots.All, grayPlaceholder)
 
+            goBackButton()
+
             button(
-                4 sl 7, GuiIcon.VariableIcon(
+                4 sl 3, GuiIcon.VariableIcon(
                     monthsRangeProperty,
                     monthsRangeProperty.guiIcon {
                         itemStack(Items.FEATHER, 1) {
@@ -70,7 +67,7 @@ object SubscribeEvent : TwitchEvent<SubscribeEventData>(subscribeEventId) {
             }
 
             button(
-                4 sl 3, GuiIcon.VariableIcon(
+                4 sl 7, GuiIcon.VariableIcon(
                     monthsRangeProperty,
                     monthsRangeProperty.guiIcon {
                         itemStack(Items.BOOK, 1) {
@@ -118,31 +115,16 @@ object SubscribeEvent : TwitchEvent<SubscribeEventData>(subscribeEventId) {
         }
     }
 
-    override fun runEvent(eventManager: TwitchEventManager, player: PlayerEntity) {
-        eventManager.onEvent(SubscriptionEvent::class.java) {
-            player.playEventSound()
-            val activeProfile = EventManager.activeProfile[player.uuid] ?: return@onEvent
-            activeProfile.actions.forEach { (eventData, actionData) ->
-                EventManager.actions.forEach { currentAction ->
-                    if (currentAction.actionId == JSON.encodeToJsonElement(actionData).jsonObject["action"]
-                            .toString().replace("\"", "")
-                    ) {
-                        if (eventData is SubscribeEventData) {
-                            if (!it.gifted) {
-                                val monthRange = eventData.requiredMonths
-                                if (monthRange == null || (monthRange.first <= it.months && monthRange.last >= it.months)) {
-                                    currentAction.runSafe(
-                                        player,
-                                        TwitchExecutorData(it.user.name),
-                                        actionData
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+    override fun runEvent(
+        event: ChannelSubscribeEvent,
+        eventData: SubscribeEventData,
+        player: PlayerEntity
+    ): Pair<Boolean, String> {
+        if (!event.data.isGift) {
+            val monthRange = eventData.requiredMonths
+            return (monthRange == null || (monthRange.first <= event.data.cumulativeMonths && monthRange.last >= event.data.cumulativeMonths)) to event.data.userName
         }
+        return false to event.data.displayName
     }
 
 }
