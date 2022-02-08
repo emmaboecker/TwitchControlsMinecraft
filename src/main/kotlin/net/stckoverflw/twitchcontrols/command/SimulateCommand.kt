@@ -113,6 +113,6 @@ private fun CommandContext<ServerCommandSource>.simulateEvent(event: Any) {
     if (twitchEventClient != null) {
         twitchEventClient.twitch4jClient.pubSub.eventManager.publish(event)
     } else {
-        source.sendError("You haven't set a twitch channel yet".literal.formatted(Formatting.RED))
+        source.sendError("You have to start the mod using /tc start to use this".literal.formatted(Formatting.RED))
     }
 }
