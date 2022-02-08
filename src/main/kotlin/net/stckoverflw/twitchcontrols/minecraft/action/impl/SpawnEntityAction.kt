@@ -25,6 +25,7 @@ import net.stckoverflw.twitchcontrols.minecraft.action.SpawnEntityData
 import net.stckoverflw.twitchcontrols.minecraft.action.TwitchExecutorData
 import net.stckoverflw.twitchcontrols.minecraft.addAction
 import net.stckoverflw.twitchcontrols.minecraft.twitch.EventData
+import net.stckoverflw.twitchcontrols.util.compoundScrolls
 import net.stckoverflw.twitchcontrols.util.goBackButton
 
 const val spawnEntityId = "spawn-entity"
@@ -99,12 +100,7 @@ class SpawnEntityAction : Action<SpawnEntityData>(spawnEntityId) {
                 }
             )
 
-            compoundScrollForwards(1 sl 9, itemStack(Items.NETHERITE_BLOCK, 1) {
-                setCustomName("Scroll Forward".literal.formatted(Formatting.GREEN))
-            }.guiIcon, compound)
-            compoundScrollBackwards(2 sl 9, itemStack(Items.NETHERITE_BLOCK, 1) {
-                setCustomName("Scroll Backwards".literal.formatted(Formatting.RED))
-            }.guiIcon, compound)
+            compoundScrolls(compound)
         }
         page(2, 2) {
             placeholder(Slots.All, grayPlaceholder)

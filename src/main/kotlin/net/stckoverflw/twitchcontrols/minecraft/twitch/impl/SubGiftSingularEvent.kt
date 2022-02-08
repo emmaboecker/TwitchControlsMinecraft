@@ -30,7 +30,6 @@ object SubGiftSingularEvent : TwitchEvent<SubGiftSingularEventData, ChannelSubGi
 
     override fun gui(player: PlayerEntity): Gui =
         igui(GuiType.NINE_BY_FIVE, "§9Sub gift (one action for all gifts)".literal, 1) {
-            val useGifersNameProperty = GuiProperty(true)
             val amountRangeProperty = GuiProperty(1..1)
             page(1, 1) {
                 placeholder(Slots.All, grayPlaceholder)
@@ -101,24 +100,7 @@ object SubGiftSingularEvent : TwitchEvent<SubGiftSingularEventData, ChannelSubGi
                     it.rangeChangerMax(amountRangeProperty)
                 }
 
-                button(2 sl 4, GuiIcon.VariableIcon(useGifersNameProperty, useGifersNameProperty.guiIcon {
-                    itemStack(Items.NAME_TAG, 1) {
-                        setCustomName("Use Gifters username".literal.formatted(if (it) Formatting.GREEN else Formatting.RED))
-                        setLore(
-                            listOf(
-                                "The Action will be triggered".literal.formatted(Formatting.GRAY).append(
-                                    if (it) "with the gifters name".literal.formatted(
-                                        Formatting.GREEN
-                                    ) else "with the name of the receiving user".literal.formatted(Formatting.RED)
-                                )
-                            )
-                        )
-                    }
-                }.iconGenerator)) {
-                    useGifersNameProperty.set(!useGifersNameProperty.get())
-                }
-
-                button(2 sl 6, GuiIcon.VariableIcon(amountRangeProperty, amountRangeProperty.guiIcon {
+                button(2 sl 5, GuiIcon.VariableIcon(amountRangeProperty, amountRangeProperty.guiIcon {
                     itemStack(Items.WRITABLE_BOOK, 1) {
                         setCustomName("Confirm".literal.formatted(Formatting.GREEN))
                         setLore(
@@ -131,7 +113,6 @@ object SubGiftSingularEvent : TwitchEvent<SubGiftSingularEventData, ChannelSubGi
                     it.player.openGui(
                         selectActionGUI(
                             SubGiftSingularEventData(
-                                useGifersNameProperty.get(),
                                 amountRangeProperty.get()
                             )
                         ), 1
@@ -146,6 +127,6 @@ object SubGiftSingularEvent : TwitchEvent<SubGiftSingularEventData, ChannelSubGi
         player: PlayerEntity
     ): Pair<Boolean, String> {
         val subGiftAmountRange = eventData.amountRange
-        return (subGiftAmountRange == null || (subGiftAmountRange.first <= event.data.count && subGiftAmountRange.last >= event.data.count)) to if (eventData.useGifterName) event.data.displayName else event.data.displayName
+        return (subGiftAmountRange == null || (subGiftAmountRange.first <= event.data.count && subGiftAmountRange.last >= event.data.count)) to event.data.displayName
     }
 }

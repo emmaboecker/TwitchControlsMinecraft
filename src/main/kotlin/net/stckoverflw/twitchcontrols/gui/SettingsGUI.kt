@@ -17,6 +17,7 @@ import net.stckoverflw.twitchcontrols.gui.item.grayPlaceholder
 import net.stckoverflw.twitchcontrols.minecraft.EventManager
 import net.stckoverflw.twitchcontrols.minecraft.removeAction
 import net.stckoverflw.twitchcontrols.util.JSON
+import net.stckoverflw.twitchcontrols.util.compoundScrolls
 
 fun settingsGUI(player: PlayerEntity): Gui =
     if (EventManager.activeProfile[player.uuid] != null) igui(GuiType.NINE_BY_FIVE, "§9Settings".literal, 1) {
@@ -65,12 +66,7 @@ fun settingsGUI(player: PlayerEntity): Gui =
                 }
             )
 
-            compoundScrollForwards(1 sl 9, itemStack(Items.NETHERITE_BLOCK, 1) {
-                setCustomName("Scroll Forward".literal.formatted(Formatting.GREEN))
-            }.guiIcon, compound)
-            compoundScrollBackwards(2 sl 9, itemStack(Items.NETHERITE_BLOCK, 1) {
-                setCustomName("Scroll Backwards".literal.formatted(Formatting.RED))
-            }.guiIcon, compound)
+            compoundScrolls(compound)
         }
         page(3, 2) {
             placeholder(Slots.All, grayPlaceholder)

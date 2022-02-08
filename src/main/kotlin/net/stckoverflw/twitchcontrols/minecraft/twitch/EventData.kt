@@ -43,12 +43,11 @@ data class SubscribeEventData(
 @Serializable
 @SerialName(subGiftSingularEventId)
 data class SubGiftSingularEventData(
-    val useGifterName: Boolean,
     @Contextual val amountRange: IntRange?,
     val id: String = UUID.randomUUID().toString()
 ) : EventData() {
     override fun toString(): String =
-        "action triggered for every sub gift. amount range: $amountRange using sub gifter's name $useGifterName"
+        "action triggered for every sub gift. amount range: $amountRange"
 }
 
 @Serializable
@@ -58,7 +57,7 @@ data class SubGiftMultipleEventData(
     val id: String = UUID.randomUUID().toString()
 ) : EventData() {
     override fun toString(): String =
-        "one action for multiple subs gifted ".plus(if (amountRange != null) "with min months ${amountRange.first} and max ${amountRange.last}" else "")
+        "one action for multiple subs gifted with amount range: $amountRange"
 }
 
 @Serializable

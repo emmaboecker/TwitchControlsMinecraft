@@ -6,6 +6,7 @@ import net.axay.fabrik.igui.*
 import net.axay.fabrik.igui.events.GuiClickEvent
 import net.axay.fabrik.igui.observable.GuiProperty
 import net.minecraft.item.Items
+import net.minecraft.text.MutableText
 import net.minecraft.util.Formatting
 import net.stckoverflw.twitchcontrols.gui.settingsGUI
 
@@ -40,3 +41,16 @@ fun GuiBuilder.PageBuilder.goBackButton(slots: GuiSlotCompound = 1 sl 1, text: S
     }.guiIcon) {
         it.player.openGui(settingsGUI(it.player), 1)
     }
+
+fun GuiBuilder.PageBuilder.compoundScrolls(
+    compound: GuiCompound<*>,
+    scrollForwardText: MutableText = "Scroll Forward".literal.formatted(Formatting.GREEN),
+    scrollBackwardsText: MutableText = "Scroll Backwards".literal.formatted(Formatting.RED)
+) {
+    compoundScrollForwards(1 sl 9, itemStack(Items.NETHERITE_BLOCK, 1) {
+        setCustomName(scrollForwardText)
+    }.guiIcon, compound)
+    compoundScrollBackwards(2 sl 9, itemStack(Items.NETHERITE_BLOCK, 1) {
+        setCustomName(scrollBackwardsText)
+    }.guiIcon, compound)
+}
