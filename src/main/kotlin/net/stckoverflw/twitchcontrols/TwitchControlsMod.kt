@@ -36,7 +36,6 @@ class TwitchControlsMod : ModInitializer, DedicatedServerModInitializer {
     }
 
     override fun onInitializeServer() {
-        println("init server")
         EventManager()
     }
 
