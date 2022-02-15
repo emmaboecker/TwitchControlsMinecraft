@@ -1,6 +1,6 @@
 # Twitch Controls Minecraft
 
-A mod that lets your Twitch chat lets your twitch chat make things happen in your game on specific events
+A mod that lets your twitch chat make things happen in your game on specific events
 
 Everything is customizable in-game with the base command `/tc menu`
 
