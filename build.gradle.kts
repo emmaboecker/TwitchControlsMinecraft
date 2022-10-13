@@ -34,7 +34,7 @@ dependencies {
     mappings("net.fabricmc:yarn:$yarn_mappings:v2")
 
     includeTransitive(implementation("com.github.twitch4j:twitch4j:1.8.0")!!)
-    includeTransitive(implementation("ch.qos.logback:logback-classic:1.2.10")!!)
+    includeTransitive(implementation("ch.qos.logback:logback-classic:1.4.4")!!)
 
     modImplementation("net.fabricmc:fabric-loader:$loader_version")
     modImplementation("net.fabricmc.fabric-api:fabric-api:$fabric_version")
