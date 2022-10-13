@@ -33,7 +33,7 @@ dependencies {
     minecraft("com.mojang:minecraft:$minecraft_version")
     mappings("net.fabricmc:yarn:$yarn_mappings:v2")
 
-    includeTransitive(implementation("com.github.twitch4j:twitch4j:1.8.0")!!)
+    includeTransitive(implementation("com.github.twitch4j:twitch4j:1.12.0")!!)
     includeTransitive(implementation("ch.qos.logback:logback-classic:1.2.10")!!)
 
     modImplementation("net.fabricmc:fabric-loader:$loader_version")
